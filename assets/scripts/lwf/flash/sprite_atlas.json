@@ -1,0 +1,108 @@
+{"frames": {
+
+"Lightning.1.jpg":
+{
+	"frame": {"x":968,"y":1286,"w":320,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.10.jpg":
+{
+	"frame": {"x":646,"y":1286,"w":320,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.11.jpg":
+{
+	"frame": {"x":324,"y":1286,"w":320,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.12.jpg":
+{
+	"frame": {"x":1608,"y":644,"w":320,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.2.jpg":
+{
+	"frame": {"x":966,"y":324,"w":320,"h":640},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.3.jpg":
+{
+	"frame": {"x":324,"y":324,"w":320,"h":640},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.4.jpg":
+{
+	"frame": {"x":1608,"y":2,"w":320,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.5.jpg":
+{
+	"frame": {"x":966,"y":2,"w":320,"h":640},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.6.jpg":
+{
+	"frame": {"x":324,"y":2,"w":320,"h":640},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.7.jpg":
+{
+	"frame": {"x":2,"y":1286,"w":320,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.8.jpg":
+{
+	"frame": {"x":2,"y":644,"w":320,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+},
+"Lightning.9.jpg":
+{
+	"frame": {"x":2,"y":2,"w":320,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":320,"h":640},
+	"sourceSize": {"w":320,"h":640}
+}},
+"meta": {
+	"app": "http://www.texturepacker.com",
+	"version": "1.0",
+	"image": "sprite_atlas_texture.png",
+	"format": "RGBA4444",
+	"size": {"w":2048,"h":2048},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:e1e053a73c06d10dd68b6a3822518183$"
+}
+}

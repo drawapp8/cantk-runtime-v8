@@ -1,0 +1,24 @@
+{
+	"className":"HttpClient",
+	"functions":[
+		{
+			"name":"send",
+			"returnType" : "bool",
+			"args"   : [
+				{"name":"onProgress", "type":"function"},
+				{"name":"onDone", "type":"function"}
+			]
+		}
+	],
+	"attributes" : [
+		{"name":"url", "type":"string"},
+		{"name":"returnType", "type":"string"},
+		{"name":"method", "type":"string"},
+		{"name":"requestHeaders", "type":"string"},
+		{"name":"requestData", "type":"string"},
+		{"name":"status", "type":"int32_t"},
+		{"name":"statusText", "type":"string"},
+		{"name":"responseHeaders", "type":"string"},
+		{"name":"responseText", "type":"string"}
+	]
+}

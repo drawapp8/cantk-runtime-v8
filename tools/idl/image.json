@@ -1,0 +1,24 @@
+{
+	"className":"Image",
+	"functions":[
+		{
+			"name":"load",
+			"returnType" : "bool",
+			"args"   : [
+				{"name":"src", "type":"string"},
+				{"name":"onDone", "type":"function"}
+			]
+		},
+		{
+			"name":"unload",
+			"returnType" : "bool",
+			"args"   : []
+		}
+	],
+	"attributes" : [
+		{"name":"id", "type":"int32_t"},
+		{"name":"src", "type":"string"},
+		{"name":"width", "type":"int32_t"},
+		{"name":"height", "type":"int32_t"}
+	]
+}

@@ -1,0 +1,3 @@
+ant debug
+adb install -r bin/GameRunner-debug.apk
+

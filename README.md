@@ -1,2 +1,2 @@
-# cantk-runtime-v8
-cantk-runtime-v8
+# cantk-runtime-pc
+cantk-runtime-pc

@@ -1,0 +1,17 @@
+{
+	"className":"Canvas",
+	"functions": [
+		{
+			"name":"init",
+			"returnType" : "bool",
+			"args"   : [
+				{"name":"type", "type":"int32_t"}
+			]
+		}
+	],
+	"attributes" : [
+		{"name":"width", "type":"int32_t"},
+		{"name":"height", "type":"int32_t"},
+		{"name":"type", "type":"int32_t"}
+	]
+}

@@ -1,0 +1,15 @@
+{
+	"className":"Screen",
+	"functions":[
+	],
+	"attributes" : [
+		{"name":"colorDepth", "type":"int32_t"},
+		{"name":"pixelDepth", "type":"int32_t"},
+		{"name":"availLeft", "type":"int32_t"},
+		{"name":"availTop", "type":"int32_t"},
+		{"name":"availWidth", "type":"int32_t"},
+		{"name":"availHeight", "type":"int32_t"},
+		{"name":"width", "type":"int32_t"},
+		{"name":"height", "type":"int32_t"}
+	]
+}

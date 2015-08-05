@@ -1,0 +1,277 @@
+{
+	"className":"CanvasRenderingContext2d",
+	"functions": [
+		{
+			"name":"stroke",
+			"returnType" : "void",
+			"args"   : []
+		},
+		{
+			"name":"fill",
+			"returnType" : "void",
+			"args"   : []
+		},
+		{
+			"name":"beginPath",
+			"returnType" : "void",
+			"args"   : []
+		},
+		{
+			"name":"closePath",
+			"returnType" : "void",
+			"args"   : []
+		},
+		{
+			"name":"save",
+			"returnType" : "void",
+			"args"   : []
+		},
+		{
+			"name":"restore",
+			"returnType" : "void",
+			"args"   : []
+		},
+		{
+			"name":"rotate",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"angle", "type":"double"}
+			]
+		},
+		{
+			"name":"scale",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"}
+			]
+		},
+		{
+			"name":"translate",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"}
+			]
+		},
+		{
+			"name":"transform",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"a", "type":"double"},
+				{"name":"b", "type":"double"},
+				{"name":"c", "type":"double"},
+				{"name":"d", "type":"double"},
+				{"name":"e", "type":"double"},
+				{"name":"f", "type":"double"}
+			]
+		},
+		{
+			"name":"setTransform",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"a", "type":"double"},
+				{"name":"b", "type":"double"},
+				{"name":"c", "type":"double"},
+				{"name":"d", "type":"double"},
+				{"name":"e", "type":"double"},
+				{"name":"f", "type":"double"}
+			]
+		},
+		{
+			"name":"resetTransform",
+			"returnType" : "void",
+			"args"   : []
+		},
+		{
+			"name":"clip",
+			"returnType" : "void",
+			"args"   : []
+		},
+		{
+			"name":"clipRect",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"},
+				{"name":"w", "type":"double"},
+				{"name":"h", "type":"double"}
+			]
+		},
+		{
+			"name":"fillText",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"text", "type":"string"},
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"}
+			]
+		},
+		{
+			"name":"strokeText",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"text", "type":"string"},
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"}
+			]
+		},
+		{
+			"name":"measureText",
+			"returnType" : "double",
+			"args"   : [
+				{"name":"text", "type":"string"}
+			]
+		},
+		{
+			"name":"clearRect",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"},
+				{"name":"w", "type":"double"},
+				{"name":"h", "type":"double"}
+			]
+		},
+		{
+			"name":"fillRect",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"},
+				{"name":"w", "type":"double"},
+				{"name":"h", "type":"double"}
+			]
+		},
+		{
+			"name":"strokeRect",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"},
+				{"name":"w", "type":"double"},
+				{"name":"h", "type":"double"}
+			]
+		},
+		{
+			"name":"drawImage",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"image", "type":"Image*"},
+				{"name":"dx", "type":"double"},
+				{"name":"dy", "type":"double"}
+			]
+		},
+		{
+			"name":"drawImage",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"image", "type":"Image*"},
+				{"name":"dx", "type":"double"},
+				{"name":"dy", "type":"double"},
+				{"name":"dw", "type":"double"},
+				{"name":"dh", "type":"double"}
+			]
+		},
+		{
+			"name":"drawImage",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"image", "type":"Image*"},
+				{"name":"sx", "type":"double"},
+				{"name":"sy", "type":"double"},
+				{"name":"sw", "type":"double"},
+				{"name":"sh", "type":"double"},
+				{"name":"dx", "type":"double"},
+				{"name":"dy", "type":"double"},
+				{"name":"dw", "type":"double"},
+				{"name":"dh", "type":"double"}
+			]
+		},
+		{
+			"name":"rect",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"},
+				{"name":"w", "type":"double"},
+				{"name":"h", "type":"double"}
+			]
+		},
+		{
+			"name":"moveTo",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"}
+			]
+		},
+		{
+			"name":"lineTo",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"}
+			]
+		},
+		{
+			"name":"bezierCurveTo",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"cp1x", "type":"double"},
+				{"name":"cp1y", "type":"double"},
+				{"name":"cp2x", "type":"double"},
+				{"name":"cp2y", "type":"double"},
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"}
+			]
+		},
+		{
+			"name":"quadraticCurveTo",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"cpx", "type":"double"},
+				{"name":"cpy", "type":"double"},
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"}
+			]
+		},
+		{
+			"name":"arcTo",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x1", "type":"double"},
+				{"name":"y1", "type":"double"},
+				{"name":"x2", "type":"double"},
+				{"name":"y2", "type":"double"},
+				{"name":"r", "type":"double"}
+			]
+		},
+		{
+			"name":"arc",
+			"returnType" : "void",
+			"args"   : [
+				{"name":"x", "type":"double"},
+				{"name":"y", "type":"double"},
+				{"name":"r", "type":"double"},
+				{"name":"sAngle", "type":"double"},
+				{"name":"eAngle", "type":"double"},
+				{"name":"counterClockWise", "type":"bool"}
+			]
+		}
+	],
+	"attributes" : [
+		{"name":"globalAlpha", "type":"double"},
+		{"name":"lineWidth", "type":"int32_t"},
+		{"name":"globalCompositeOperation", "type":"string"},
+		{"name":"strokeStyle", "type":"string"},
+		{"name":"fillStyle", "type":"string"},
+		{"name":"font", "type":"string"},
+		{"name":"lineCap", "type":"string"},
+		{"name":"miterLimit", "type":"double"},
+		{"name":"textBaseline", "type":"string"},
+		{"name":"textAlign", "type":"string"},
+		{"name":"lineJoin", "type":"string"}
+	]
+}
+
