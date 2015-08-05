@@ -1,38 +1,7 @@
-#include <stdio.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
-#include <errno.h>
 #include "Native.h"
+#include "Config.h"
 #include "V8Wrapper.h"
 #include "CanvasRenderingContext2d.h"
-
-int getIntOption(int argc, char** argv, const char* prefix, int defval) {
-	int len = strlen(prefix);
-	for(int i = 0; i < argc; i++) {
-		const char* iter = argv[i];
-		if(strncmp(iter, prefix, len) == 0) {
-			int v = atoi(iter + len);
-			return v;
-		}
-	}
-
-	return defval;
-}
-
-const char* getStrOption(int argc, char** argv, const char* prefix, const char* defval) {
-	int len = strlen(prefix);
-	for(int i = 0; i < argc; i++) {
-		const char* iter = argv[i];
-		if(strncmp(iter, prefix, len) == 0) {
-			return (iter + len);
-		}
-	}
-
-	return defval;
-}
-
 
 class SimpleArrayBufferAllocator : public ArrayBuffer::Allocator {
  public:
@@ -40,9 +9,17 @@ class SimpleArrayBufferAllocator : public ArrayBuffer::Allocator {
     void* data = AllocateUninitialized(length);
     return data == NULL ? data : memset(data, 0, length);
   }
-  virtual void* AllocateUninitialized(size_t length) { return malloc(length); }
-  virtual void Free(void* data, size_t) { free(data); }
+
+  virtual void* AllocateUninitialized(size_t length) { 
+  	return malloc(length); 
+  }
+
+  virtual void Free(void* data, size_t) { 
+  	free(data); 
+  }
 };
+
+static SimpleArrayBufferAllocator array_buffer_allocator;
 
 template <class TypeName>
 inline Local<TypeName> StrongPersistentToLocal(
@@ -186,30 +163,39 @@ void Print(const FunctionCallbackInfo<Value>& args) {
   CONSOLE_LOG("\n");
 }
 
-void Load(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  for (int i = 0; i < args.Length(); i++) {
-    v8::HandleScope handle_scope(args.GetIsolate());
-    v8::String::Utf8Value file(args[i]);
-    if (*file == NULL) {
-      args.GetIsolate()->ThrowException(
-          v8::String::NewFromUtf8(args.GetIsolate(), "Error loading file"));
+void LoadFile(const char* fileName) {
+	NanScope();
+	Isolate* isolate = Isolate::GetCurrent();
+
+    if (fileName == NULL) {
+      isolate->ThrowException(v8::String::NewFromUtf8(isolate, "Error loading file"));
       return;
     }
-    v8::Handle<v8::String> source = ReadFile(args.GetIsolate(), *file);
+
+    v8::Handle<v8::String> source = ReadFile(isolate, fileName);
     if (source.IsEmpty()) {
-      args.GetIsolate()->ThrowException(
-           v8::String::NewFromUtf8(args.GetIsolate(), "Error loading file"));
+      isolate->ThrowException(
+           v8::String::NewFromUtf8(isolate, "Error loading file"));
       return;
     }
-    if (!ExecuteString(args.GetIsolate(),
+    if (!ExecuteString(isolate,
                        source,
-                       v8::String::NewFromUtf8(args.GetIsolate(), *file),
+                       v8::String::NewFromUtf8(isolate, fileName),
                        true,
                        true)) {
-      args.GetIsolate()->ThrowException(
-          v8::String::NewFromUtf8(args.GetIsolate(), "Error executing file"));
+      isolate->ThrowException(
+          v8::String::NewFromUtf8(isolate, "Error executing file"));
       return;
     }
+}
+
+void Load(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+  for (int i = 0; i < args.Length(); i++) {
+    v8::HandleScope handle_scope(isolate);
+    v8::String::Utf8Value file(args[i]);
+  	
+  	LoadFile(*file);
   }
 }
 
@@ -225,28 +211,12 @@ Handle<Context> CreateDefaultContext(Isolate* isolate) {
   return context;
 }
 
-int RunMain(Isolate* isolate, int argc, char* argv[]) {
-	char cwd[1024] = {0};
-	char fullFileName[1024] = {0};
-	const char* str = getStrOption(argc, argv, "--startup=", "assets/scripts/startup.js");
+int loadStartup(Isolate* isolate) {
+	NanScope();
 
-	LOGI("Run: %s\n", str);
-
-	if(str[0] != '/') {
-		getcwd(cwd, sizeof(cwd));
-		snprintf(fullFileName, sizeof(fullFileName)-1, "%s/%s", cwd, str);
-	}
-	else {
-		strncpy(fullFileName, str, sizeof(fullFileName)-1);
-	}
-
-	const char* last = strrchr(fullFileName, '/');
-	strncpy(cwd, fullFileName, last-fullFileName);
-	chdir(cwd);
-
-	const char* fileName = last+1;
-	Handle<String> source = ReadFile(isolate, fullFileName);
-	int result = !ExecuteString(isolate, source, NanNew<String>(fileName), false, true);
+	string fileName = Config::toSysAbsPath("scripts/startup.js");
+	Handle<String> source = ReadFile(isolate, fileName.c_str());
+	int result = !ExecuteString(isolate, source, NanNew<String>(fileName.c_str()), false, true);
 
 	return result;
 }
@@ -260,6 +230,18 @@ V8Wrapper::V8Wrapper() {
 V8Wrapper::~V8Wrapper() {
 }
 	
+void V8Wrapper::loadApp(const char* appIndex) {
+	if(appIndex) {
+		Config::setAppIndex(appIndex);
+	};
+	
+	chdir(Config::appRoot.c_str());
+	LoadFile(Config::appIndex.c_str());
+	LOGI("V8Wrapper::loadApp: %s\n", Config::appIndex.c_str());
+
+	return;
+}
+
 void V8Wrapper::init(int argc, char* argv[]) {
 	LOGI("V8Wrapper::init:%d\n", argc);
 	V8::InitializeICU();
@@ -267,7 +249,6 @@ void V8Wrapper::init(int argc, char* argv[]) {
 	V8::InitializePlatform(platform);
 	V8::Initialize();
 	V8::SetFlagsFromCommandLine(&argc, argv, true);
-	SimpleArrayBufferAllocator array_buffer_allocator;
 	V8::SetArrayBufferAllocator(&array_buffer_allocator);
 	Isolate* isolate = Isolate::New();
 	
@@ -284,7 +265,7 @@ void V8Wrapper::init(int argc, char* argv[]) {
 	nativeInitBinding(V8Wrapper::sContext->Global());
 	CanvasRenderingContext2d::init();
 
-    RunMain(isolate, argc, argv);
+    loadStartup(isolate);
 	Handle<Value> tickVal = V8Wrapper::sContext->Global()->Get(NanNew("tick"));
 	if (!tickVal->IsFunction()) {
 		LOGI("Error: Script does not declare 'tick' global function.\n");

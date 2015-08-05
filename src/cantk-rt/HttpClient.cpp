@@ -189,7 +189,6 @@ void HttpClient::callOnProgress(int total, int finished) {
 
 void HttpClient::init() {
 	ns_mgr_init(&HttpClient::sNsMgr, NULL);
-	LOGI("HttpClient::init");
 }
 
 void HttpClient::pollEvents() {

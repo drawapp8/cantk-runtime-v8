@@ -11,11 +11,11 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "console.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif/*__cplusplus*/
-
-#include "console.h"
 
 int now();
 int atoi_r(const char* str, const char* start);

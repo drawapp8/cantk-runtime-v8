@@ -21,6 +21,7 @@
 #include <sys/time.h>    
 #include <unistd.h>
 #include "HttpClient.h"
+#include "Config.h"
 #include "V8Wrapper.h"
 
 static double lastRenderTime;
@@ -41,15 +42,15 @@ static double getTime () {
 	return (double)clock() / CLOCKS_PER_SEC;
 }
 
-JNIAPI Java_com_tangide_canvas_CanvasJNI_surfaceCreated(JNIEnv * env, jobject obj) 
-{
-	int argc = 3;
-	char* argv[3] = {"android", "--startup=/mnt/sdcard-ext/cantk-rt-v8/scripts/startup.js", NULL};
+JNIAPI Java_com_tangide_canvas_CanvasJNI_surfaceCreated(JNIEnv * env, jobject obj) {
+	int argc = 2;
+	char* argv[3] = {"android", "--sys-root=/mnt/sdcard-ext/cantk-rt-v8", NULL};
 
 	lastRenderTime = getTime();
-	LOGI("Java_com_tangide_canvas_CanvasJNI_surfaceCreated");
 
+	Config::init(argc, argv);
 	V8Wrapper::init(argc, argv);
+	V8Wrapper::loadApp("/mnt/sdcard-ext/cantk-rt-v8/scripts/test/app-test.js");
 }
 
 JNIAPI Java_com_tangide_canvas_CanvasJNI_surfaceChanged(JNIEnv * env, jobject obj,  

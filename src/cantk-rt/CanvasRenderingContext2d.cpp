@@ -16,6 +16,7 @@
 #include "nanovg_gl.h"
 #include "color_parser.h"
 
+#include "Config.h"
 #include <fossa/fossa.h>
 #include "CanvasRenderingContext2d.h"
 
@@ -381,8 +382,14 @@ void CanvasRenderingContext2d::setLineJoin(string lineJoin) {
 int CanvasRenderingContext2d::init() {
 	NVGcontext* ctx = nvgCreateContext(NVG_STENCIL_STROKES | NVG_DEBUG);
 	CanvasRenderingContext2d::shareCtx = ctx;
-	CanvasRenderingContext2d::sansFont = nvgCreateFont(ctx, "sans", "../assets/font/BreakTheSilence.ttf");
-	CanvasRenderingContext2d::sansBoldFont = nvgCreateFont(ctx, "sans-bold","../assets/font/Simpleton-Gothic.ttf");
+
+	string sansFont = Config::toSysAbsPath("font/BreakTheSilence.ttf");
+	string sansBoldFont = Config::toSysAbsPath("font/Simpleton-Gothic.ttf");
+	CanvasRenderingContext2d::sansFont = nvgCreateFont(ctx, "sans", sansFont.c_str());
+	CanvasRenderingContext2d::sansBoldFont = nvgCreateFont(ctx, "sans-bold", sansBoldFont.c_str());
+
+	LOGI("sansFont:%s\n", sansFont.c_str());	
+	LOGI("sansBoldFont:%s\n", sansBoldFont.c_str());	
 
 	return 0;
 }

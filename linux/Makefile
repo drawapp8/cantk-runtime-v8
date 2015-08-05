@@ -8,6 +8,7 @@ CFLAGS=-I$(V8_SRC) -I$(V8_SRC)/include -I../src/cantk-rt -I$(THIRD_ROOT) \
 
 VPATH=./:../src/cantk-rt/:$(THIRD_ROOT)/fossa/:$(THIRD_ROOT)/nanovg/src/
 OBJS=main.o \
+	Config.o \
 	 CanvasBinding.o \
 	 CanvasRenderingContext2dBinding.o \
 	 ImageBinding.o \
@@ -40,7 +41,7 @@ all:$(OBJS)
 	mv -f jsrun ../
 
 clean:
-	rm -f *.o jsrun
+	rm -f *.o ../jsrun
 uv:
 	gcc -g `pkg-config --cflags libuv --libs` uv.c -o uv_test
 

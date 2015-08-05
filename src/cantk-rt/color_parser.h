@@ -11,14 +11,11 @@
 #ifndef COLOR_PARSER_H
 #define COLOR_PARSER_H
 
+#include "console.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif/*__cplusplus*/
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include "console.h"
 
 typedef struct _ColorRGBA {
 	unsigned char r;

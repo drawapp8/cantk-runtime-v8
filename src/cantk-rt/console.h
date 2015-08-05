@@ -1,6 +1,13 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
+#include <stdio.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h>
+
 #ifndef LOGI
 #ifdef ANDROID
 #include <android/log.h>

@@ -74,6 +74,7 @@ LOCAL_MODULE    := cantkrt
 LOCAL_SRC_FILES := canvas_jni.cpp  \
 	$(THIRD_SRC)/fossa/fossa.c \
 	$(THIRD_SRC)/nanovg/src/nanovg.c \
+	$(CANTK_RT_SRC)/Config.cpp \
 	$(CANTK_RT_SRC)/HttpClientBinding.cpp \
 	$(CANTK_RT_SRC)/CanvasBinding.cpp \
 	$(CANTK_RT_SRC)/FileSystem.cpp \

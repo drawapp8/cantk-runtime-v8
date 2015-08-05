@@ -3,9 +3,11 @@
 #  include <GL/glew.h>
 #endif
 #include <GLFW/glfw3.h>
+
+#include <uv.h>
 #include "Native.h"
 #include "V8Wrapper.h"
-#include <uv.h>
+#include "Config.h"
 
 void errorcb(int error, const char* desc)
 {
@@ -93,8 +95,10 @@ int main(int argc, char** argv)
 {
 	AppInfo info = {};
 	GLFWwindow* window = NULL;
-	int w = getIntOption(argc, argv, "--width=", 800);
-	int h = getIntOption(argc, argv, "--height=", 600);;
+	Config::init(argc, argv);
+
+	int w = Config::screenWidth;
+	int h = Config::screenHeight;
 	
 	if (!glfwInit()) {
 		printf("Failed to init GLFW.");
@@ -133,6 +137,7 @@ int main(int argc, char** argv)
 	info.lastEventTime = glfwGetTime();
 /////////////////////////////////////////////////////
 	V8Wrapper::init(argc, argv);
+	V8Wrapper::loadApp(NULL);
 	V8Wrapper::resize(w, h);
 	
 	uv_idle_t idle;
