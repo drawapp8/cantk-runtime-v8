@@ -93,7 +93,7 @@ static Handle<String> ReadFile(Isolate* isolate, const char* name) {
   FILE* file = fopen(name, "rb");
   if (file == NULL) {
 	LOGI("open file failed: %s %d\n", name, errno);
-  	return Handle<String>();
+  	return NanNew<String>("");
   }
 
   fseek(file, 0, SEEK_END);
@@ -216,6 +216,11 @@ int loadStartup(Isolate* isolate) {
 
 	string fileName = Config::toSysAbsPath("scripts/startup.js");
 	Handle<String> source = ReadFile(isolate, fileName.c_str());
+
+	if(source->Length() < 1) {
+		source = NanNew("function tick(t, dt) {\n print(\"dummy tick.\");\n}");		
+	}
+
 	int result = !ExecuteString(isolate, source, NanNew<String>(fileName.c_str()), false, true);
 
 	return result;
@@ -262,6 +267,9 @@ void V8Wrapper::init(int argc, char* argv[]) {
       return;
     }
 
+	V8Wrapper::sPlatform = platform;
+	V8Wrapper::sIsolate = isolate;
+
 	nativeInitBinding(V8Wrapper::sContext->Global());
 	CanvasRenderingContext2d::init();
 
@@ -282,8 +290,6 @@ void V8Wrapper::init(int argc, char* argv[]) {
 	Handle<Function> dispatchEventFunc = Handle<Function>::Cast(dispatchEventVal);
 	NanAssignPersistent(V8Wrapper::sDispatchEventFunc, dispatchEventFunc);
 
-	V8Wrapper::sPlatform = platform;
-	V8Wrapper::sIsolate = isolate;
 	LOGI("V8Wrapper::init done\n");
 }
 
@@ -305,20 +311,19 @@ void V8Wrapper::tick(double t, double dt) {
     Isolate::Scope isolate_scope(isolate);
 	Handle<Function> tickFunc = NanNew(V8Wrapper::sTickFunc);
 
-	CanvasRenderingContext2d::beginPaint();
-
 	TryCatch try_catch;
 	Handle<Value> _argv[2];
 	_argv[0] = Number::New(isolate, t);
 	_argv[1] = Number::New(isolate, dt);
 
+	CanvasRenderingContext2d::beginPaint();
 	Handle<Value> result = tickFunc->Call(isolate->GetCurrentContext()->Global(), 2, _argv);
+	CanvasRenderingContext2d::endPaint();
 	
 	if (try_catch.HasCaught()) {
 		ReportException(isolate, &try_catch);
 		return;
 	}
-	CanvasRenderingContext2d::endPaint();
 }
 	
 void V8Wrapper::dispatchEvent(Handle<Object> event) {
