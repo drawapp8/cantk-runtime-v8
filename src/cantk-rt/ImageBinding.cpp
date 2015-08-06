@@ -71,23 +71,32 @@ NAN_SETTER(ImageSetSrc) {
 		Isolate* isolate = args.GetIsolate();
 		Handle<Value> _argv[1];
 		if(ret) {
-			_argv[0] = NanNew("success");
+			eventName = "load";
 			Handle<String> funcName = NanNew("onload");
 			Handle<Value> onLoadVal = args.This()->Get(funcName);
 			if(onLoadVal->IsFunction()) {
+				Handle<Object> event = NanNew<Object>();
+				event->Set(NanNew("name"), NanNew<String>(eventName));
+				event->Set(NanNew("target"), args.This());
+				_argv[0] = event;
+
 				Handle<Function>  onLoad = Handle<Function>::Cast(onLoadVal);
 				onLoad->Call(args.This(), 1, _argv);
 			}
 		}
 		else {
-			_argv[0] = NanNew("error");
+			eventName = "error";
 			Handle<String> funcName = NanNew("onerror");
 			Handle<Value> onErrorVal = args.This()->Get(funcName);
 			if(onErrorVal->IsFunction()) {
+				Handle<Object> event = NanNew<Object>();
+				event->Set(NanNew("name"), NanNew<String>(eventName));
+				event->Set(NanNew("target"), args.This());
+				_argv[0] = event;
+
 				Handle<Function>  onError = Handle<Function>::Cast(onErrorVal);
 				onError->Call(args.This(), 1, _argv);
 			}
-			eventName = "error";
 		}
 			
 		Handle<String> funcName = NanNew("dispatchEvent");
@@ -97,6 +106,7 @@ NAN_SETTER(ImageSetSrc) {
 			Handle<Object> event = NanNew<Object>();
 			event->Set(NanNew("name"), NanNew<String>(eventName));
 			event->Set(NanNew("async"), NanNew<Boolean>(true));
+			event->Set(NanNew("target"), args.This());
 			_argv[0] = event;
 			dispatchEvent->Call(args.This(), 1, _argv);
 			printf("dispatchEvent call\n");
