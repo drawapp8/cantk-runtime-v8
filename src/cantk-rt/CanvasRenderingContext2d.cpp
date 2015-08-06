@@ -380,7 +380,7 @@ void CanvasRenderingContext2d::setLineJoin(string lineJoin) {
 
 
 int CanvasRenderingContext2d::init() {
-	NVGcontext* ctx = nvgCreateContext(NVG_STENCIL_STROKES | NVG_DEBUG);
+	NVGcontext* ctx = nvgCreateContext(0);
 	CanvasRenderingContext2d::shareCtx = ctx;
 
 	string sansFont = Config::toSysAbsPath("font/BreakTheSilence.ttf");
@@ -418,24 +418,33 @@ int CanvasRenderingContext2d::deinit() {
 }
 
 bool CanvasRenderingContext2d::loadImage(const string& url, int& id, int& w, int& h) {
-	int offset = url.find(";base64,");
-	if(offset > 0) {
-		int n = url.length();
-		char* buff = new char[n];
-		const char* data = url.c_str() + offset + 8;
-		int len = base64_decode((unsigned char*)data, n-offset-8, buff); 
-		id = nvgCreateImageMem(CanvasRenderingContext2d::shareCtx, 0, (unsigned char*)buff, len);
-		delete buff;
+	map<string, int>::const_iterator iter = CanvasRenderingContext2d::imagesCache.find(url);
+
+	if(iter == CanvasRenderingContext2d::imagesCache.end()) {
+		int offset = url.find(";base64,");
+		if(offset > 0) {
+			int n = url.length();
+			char* buff = new char[n];
+			const char* data = url.c_str() + offset + 8;
+			int len = base64_decode((unsigned char*)data, n-offset-8, buff); 
+			id = nvgCreateImageMem(CanvasRenderingContext2d::shareCtx, 0, (unsigned char*)buff, len);
+			delete buff;
+		}
+		else {
+			const char* fileName = url.c_str();
+			if(url.find("file://") == 0) {
+				fileName += 7;
+			}
+			id = nvgCreateImage(CanvasRenderingContext2d::shareCtx, fileName, 0);
+		}
 	}
 	else {
-		const char* fileName = url.c_str();
-		if(url.find("file://") == 0) {
-			fileName += 7;
-		}
-		id = nvgCreateImage(CanvasRenderingContext2d::shareCtx, fileName, 0);
+		id = iter->second;
+		LOGI("found image in cache:%d\n", id);
 	}
 
 	if(id > 0) {
+		CanvasRenderingContext2d::imagesCache[url] = id;
 		nvgImageSize(CanvasRenderingContext2d::shareCtx, id, &w, &h);
 	}
 
@@ -451,3 +460,4 @@ int CanvasRenderingContext2d::height = 0;
 int CanvasRenderingContext2d::sansFont = 0;
 int CanvasRenderingContext2d::sansBoldFont = 0;
 NVGcontext* CanvasRenderingContext2d::shareCtx = NULL;
+map<string, int> CanvasRenderingContext2d::imagesCache;

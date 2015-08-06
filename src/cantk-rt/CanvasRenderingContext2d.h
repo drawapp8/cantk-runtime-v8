@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <map>
 #include <v8.h>
 #include <nan/nan.h>
 #include "Image.h"
@@ -114,6 +115,8 @@ private:
 	NVGcontext* ctx;
 	uint32_t _textBaselineV;
 	uint32_t _textAlignV;
+	
+	static map<string, int> imagesCache;
 };
 
 #endif
