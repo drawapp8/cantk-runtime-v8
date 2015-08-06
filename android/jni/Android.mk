@@ -84,6 +84,8 @@ LOCAL_SRC_FILES := canvas_jni.cpp  \
 	$(CANTK_RT_SRC)/HttpClient.cpp \
 	$(CANTK_RT_SRC)/FileSystemBinding.cpp \
 	$(CANTK_RT_SRC)/Canvas.cpp \
+	$(CANTK_RT_SRC)/Location.cpp \
+	$(CANTK_RT_SRC)/LocationBinding.cpp \
 	$(CANTK_RT_SRC)/Image.cpp \
 	$(CANTK_RT_SRC)/ImageBinding.cpp \
 	$(CANTK_RT_SRC)/Screen.cpp \

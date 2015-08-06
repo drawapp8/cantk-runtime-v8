@@ -1,4 +1,5 @@
 mkdir -p output
+node /work/lab/cantk/v8-native-binding-generator/gen-v8-binding.js idl/location.json
 node /work/lab/cantk/v8-native-binding-generator/gen-v8-binding.js idl/screen.json
 node /work/lab/cantk/v8-native-binding-generator/gen-v8-binding.js idl/fs.json
 node /work/lab/cantk/v8-native-binding-generator/gen-v8-binding.js idl/image.json

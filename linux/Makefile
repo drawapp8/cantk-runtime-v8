@@ -9,19 +9,21 @@ CFLAGS=-I$(V8_SRC) -I$(V8_SRC)/include -I../src/cantk-rt -I$(THIRD_ROOT) \
 VPATH=./:../src/cantk-rt/:$(THIRD_ROOT)/fossa/:$(THIRD_ROOT)/nanovg/src/
 OBJS=main.o \
 	Config.o \
-	 CanvasBinding.o \
-	 CanvasRenderingContext2dBinding.o \
-	 ImageBinding.o \
-	 Native.o \
-	 Canvas.o  \
-	 CanvasRenderingContext2d.o   \
-	 Image.o    \
-	 nanovg.o \
-	 color_parser.o \
-	 utils.o \
-	 HttpClient.o \
-	 HttpClientBinding.o fossa.o V8Wrapper.o \
-	 FileSystemBinding.o  FileSystem.o Screen.o ScreenBinding.o
+	Location.o \
+	LocationBinding.o \
+	CanvasBinding.o \
+	CanvasRenderingContext2dBinding.o \
+	ImageBinding.o \
+	Native.o \
+	Canvas.o  \
+	CanvasRenderingContext2d.o   \
+	Image.o    \
+	nanovg.o \
+	color_parser.o \
+	utils.o \
+	HttpClient.o \
+	HttpClientBinding.o fossa.o V8Wrapper.o \
+	FileSystemBinding.o  FileSystem.o Screen.o ScreenBinding.o
 
 LIBV8_ROOT=$(V8_SRC)/out/x64.debug/obj.target/tools/gyp
 LIBICU_ROOT=$(V8_SRC)/out/x64.debug/obj.target/third_party/icu

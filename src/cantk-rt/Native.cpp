@@ -8,6 +8,7 @@
 #include "CanvasBinding.h"
 #include "ScreenBinding.h"
 #include "ImageBinding.h"
+#include "LocationBinding.h"
 #include "FileSystemBinding.h"
 #include "HttpClientBinding.h"
 #include "CanvasRenderingContext2dBinding.h"
@@ -30,6 +31,7 @@ void nativeInitBinding(Handle<Object> target) {
 
 	ScreenInitBinding(target);
 	ImageInitBinding(target);
+	LocationInitBinding(target);
 	CanvasInitBinding(target);
 	FileSystemInitBinding(target);
 	HttpClientInitBinding(target);

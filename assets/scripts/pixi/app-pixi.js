@@ -1,7 +1,7 @@
 require("pixi.js");
-require("basic.js");
+//require("basic.js");
 //require("graphics.js");
-//require("spritesheet.js");
+require("spritesheet.js");
 //require("text.js");
 //require("render-texture.js");
 //require("custom-filter.js");

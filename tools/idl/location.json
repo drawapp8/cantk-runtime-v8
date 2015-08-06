@@ -1,0 +1,14 @@
+{
+	"className":"Location",
+	"functions":[],
+	"attributes" : [
+		{"name":"protocol", "type":"string"},
+		{"name":"host", "type":"string"},
+		{"name":"hostname", "type":"string"},
+		{"name":"path", "type":"string"},
+		{"name":"href", "type":"string"},
+		{"name":"origin", "type":"string"},
+		{"name":"search", "type":"string"},
+		{"name":"port", "type":"int32_t"}
+	]
+}

@@ -450,17 +450,10 @@ navigator.language = "zh-CN";
 navigator.userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.65 Safari/537.36";
 navigator.appVersion = "5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.65 Safari/537.36";
 
-var location = {};
-location.href = "/";
-location.path = "/";
-location.pathname = "/";
-location.protocol = "file:";
-location.search = "";
-document.location = location;
-
-window.location = location;
-
+window.location = new Location();
 window.fs = new FileSystem();
+
+console.log(location.protocol + "//" + location.host);
 
 String.prototype.basename = function(withoutExt) {
 	var filename = this.replace(/\\/g,'/').replace( /.*\//, '' );
