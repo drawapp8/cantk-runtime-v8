@@ -24,7 +24,10 @@
 #include "Config.h"
 #include "V8Wrapper.h"
 
-static double lastRenderTime;
+static int renderTimes = 0;
+static double startupTime = 0.0;
+static double lastRenderTime = 0.0;
+
 #define JNIAPI extern "C" JNIEXPORT void JNICALL
 #define JNIAPIINT extern "C" JNIEXPORT int JNICALL
 
@@ -39,18 +42,39 @@ static void graphic_context_resize(int w, int h, int dpi) {
 }
 
 static double getTime () {
-	return (double)clock() / CLOCKS_PER_SEC;
+	struct timeval tv = {0};
+
+	gettimeofday (&tv, NULL);
+	double seconds = tv.tv_sec;
+	double dotSeconds = ((double)(tv.tv_usec))/1000000.0;
+	double value = seconds + dotSeconds;
+
+	return value;
 }
 
 JNIAPI Java_com_tangide_canvas_CanvasJNI_surfaceCreated(JNIEnv * env, jobject obj) {
 	int argc = 2;
-	char* argv[3] = {"android", "--sys-root=/mnt/sdcard-ext/cantk-rt-v8", NULL};
+	struct stat st = {0};
 
 	lastRenderTime = getTime();
+	startupTime =  lastRenderTime;
+
+	const char* sysRoot = "/mnt/sdcard-ext/cantk-rt-v8";
+	if(!stat(sysRoot, &st) == 0) {
+		sysRoot = "/mnt/sdcard/cantk-rt-v8";
+	}
+	string str = "--sys-root=" + string(sysRoot);
+	char* argv[3] = {"android", (char*)str.c_str(), NULL};
 
 	Config::init(argc, argv);
 	V8Wrapper::init(argc, argv);
-	V8Wrapper::loadApp("/mnt/sdcard-ext/cantk-rt-v8/scripts/test/app-test.js");
+
+	const char* defaultAppIndex = "/mnt/sdcard-ext/cantk-rt-v8/scripts/test/app-test.js";
+	if(!stat(defaultAppIndex, &st) == 0) {
+		defaultAppIndex = "/mnt/sdcard/cantk-rt-v8/scripts/test/app-test.js";
+	}
+
+	V8Wrapper::loadApp(defaultAppIndex);
 }
 
 JNIAPI Java_com_tangide_canvas_CanvasJNI_surfaceChanged(JNIEnv * env, jobject obj,  
@@ -63,14 +87,21 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_surfaceChanged(JNIEnv * env, jobject ob
 JNIAPI Java_com_tangide_canvas_CanvasJNI_render(JNIEnv * env, jobject obj)
 {
 	glClearDepthf(1.0f);
-    glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-	double t = getTime();
+	double t = getTime() - startupTime;
 	double dt = t - lastRenderTime;
 	lastRenderTime = t;
 
 	HttpClient::pollEvents();
 	V8Wrapper::tick(t, dt);
+
+	renderTimes++;
+
+	dt = getTime() - startupTime;
+	int fps = renderTimes/dt;
+	
+	LOGI("fps=%d renderTimes=%d dt=%lf t=%lf CLOCKS_PER_SEC=%d\n", fps, renderTimes, dt, t, CLOCKS_PER_SEC);
 }
 

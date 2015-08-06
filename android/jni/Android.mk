@@ -68,7 +68,7 @@ LOCAL_CFLAGS    :=  -DNANOVG_GLES2_IMPLEMENTATION -DDEBUG -DANDROID  -Os \
 	-I/work/android/android-4.4/frameworks/native/include \
 	-I$(THIRD_SRC)/nanovg/src/ -I$(THIRD_SRC) -I$(CANTK_RT_SRC)
 
-LOCAL_CPPFLAGS += -std=c++11 -DNANOVG_GLES2 -I./$(THIRD_SRC)/nanovg/src/ -I$(THIRD_SRC)
+LOCAL_CPPFLAGS += -std=c++11 -DNANOVG_GLES2 -I./$(THIRD_SRC)/nanovg/src/ -I$(THIRD_SRC) -Wwrite-strings
 
 LOCAL_MODULE    := cantkrt 
 LOCAL_SRC_FILES := canvas_jni.cpp  \
