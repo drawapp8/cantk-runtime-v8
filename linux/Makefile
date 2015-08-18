@@ -3,10 +3,11 @@ V8BINDING_ROOT=/work/lab/cantk/v8-native-binding-generator/
 
 THIRD_ROOT=../src/third
 CFLAGS=-I$(V8_SRC) -I$(V8_SRC)/include -I../src/cantk-rt -I$(THIRD_ROOT) \
-		-I$(THIRD_ROOT)/nanovg/src -I$(V8BINDING_ROOT) \
+		-I$(THIRD_ROOT)/nanovg/src -I$(V8BINDING_ROOT) -I$(THIRD_ROOT)/libuv/include\
+		-I$(THIRD_ROOT)/libuv/src \
 		-DNANOVG_GL2 -DNANOVG_GLEW
 
-VPATH=./:../src/cantk-rt/:$(THIRD_ROOT)/fossa/:$(THIRD_ROOT)/nanovg/src/
+VPATH=./:../src/cantk-rt/:$(THIRD_ROOT)/fossa/:$(THIRD_ROOT)/nanovg/src/:$(THIRD_ROOT)/libuv/src/unix/:$(THIRD_ROOT)/libuv/src
 OBJS=main.o \
 	Config.o \
 	Location.o \
@@ -23,7 +24,34 @@ OBJS=main.o \
 	utils.o \
 	HttpClient.o \
 	HttpClientBinding.o fossa.o V8Wrapper.o \
-	FileSystemBinding.o  FileSystem.o Screen.o ScreenBinding.o
+	FileSystemBinding.o  FileSystem.o Screen.o ScreenBinding.o \
+	fs-poll.o \
+	inet.o \
+	threadpool.o \
+	uv-common.o \
+	version.o \
+	async.o \
+	core.o \
+	dl.o \
+	fs.o \
+	getaddrinfo.o \
+	getnameinfo.o \
+	loop-watcher.o \
+	loop.o \
+	pipe.o \
+	poll.o \
+	process.o \
+	signal.o \
+	stream.o \
+	tcp.o \
+	thread.o \
+	timer.o \
+	tty.o \
+	udp.o \
+	linux-core.o \
+	linux-inotify.o \
+	linux-syscalls.o \
+	proctitle.o
 
 LIBV8_ROOT=$(V8_SRC)/out/x64.debug/obj.target/tools/gyp
 LIBICU_ROOT=$(V8_SRC)/out/x64.debug/obj.target/third_party/icu
