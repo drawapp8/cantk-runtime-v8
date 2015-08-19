@@ -3,6 +3,7 @@ window.tickTime = 0;
 window.timerFuncs = {};
 window.intervalFuncs = {};
 window.requestAnimationFrameFuncs = {};
+window.cantkRTV8 = true;
 
 function setTimeout(callback, duration) {
 	if(!callback) return;
@@ -268,7 +269,7 @@ EventDispatcher.prototype.dispatchEvent = function(event) {
 	if(callbacks) {
 		var n = callbacks.length;
 
-		//FIXME
+		callbacks = callbacks.slice();
 		for(var i = 0; i < n; i++) {
 			var iter = callbacks[i];
 			var callback = iter.callback;
@@ -338,7 +339,9 @@ XMLHttpRequest.prototype.setReadyState = function(readyState) {
 		this.responseText = httpClient.responseText;
 
 		try {
-			this.respHeaders = JSON.parse(httpClient.responseHeaders);
+			if(httpClient.responseHeaders) {
+				this.respHeaders = JSON.parse(httpClient.responseHeaders);
+			}
 		}
 		catch(e) {
 			console.log("parse header failed:" + httpClient.responseHeaders);
@@ -380,6 +383,9 @@ XMLHttpRequest.prototype.open = function(method, url, async, username, password)
 }
 
 XMLHttpRequest.prototype.overrideMimeType = function(mimeType) {
+	this.mimeType = mimeType;
+
+	return;
 }
 
 XMLHttpRequest.prototype.send = function(body) {
@@ -395,7 +401,7 @@ XMLHttpRequest.prototype.sendToLocal = function(body) {
 	this.httpClient = {};
 
 	this.setReadyState(XMLHttpRequest.Sent);
-	var text = window.fs.readAsText(this.url);
+	var text = window.fs.readAsText(this.url, this.mimeType);
 	this.setReadyState(XMLHttpRequest.Receiving);
 	
 	this.httpClient.status = 200;
@@ -447,7 +453,8 @@ function navigator() {
 }
 
 navigator.language = "zh-CN";
-navigator.userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.65 Safari/537.36";
+navigator.pointerEnabled = true;
+navigator.userAgent = "Mozilla/5.0 (Linux; Android 5.0.1; CanRT Runtime) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.93 Mobile Safari/537.36";
 navigator.appVersion = "5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.65 Safari/537.36";
 
 window.location = new Location();
@@ -513,6 +520,31 @@ function loadURL(url) {
 }
 
 EventDispatcher.apply(Image.prototype);
+
+///////////////////////////////////////////////////////
+//TODO: implement Audio
+///////////////////////////////////////////////////////
+
+function Audio() {
+}
+
+Audio.prototype.load = function() {
+
+}
+
+Audio.prototype.play = function() {
+}
+
+Audio.prototype.pause = function() {
+}
+
+Audio.prototype.canPlayType = function(type) {
+	return "yes";
+}
+
+Audio.prototype.addEventListener = function() {
+}
+///////////////////////////////////////////////////////
 
 //loadURL("lwf/app-lwf.js");
 //loadURL("pixi/app-pixi.js");
