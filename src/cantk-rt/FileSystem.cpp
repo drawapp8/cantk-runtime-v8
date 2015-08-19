@@ -33,12 +33,9 @@ bool FileSystem::readAsText(const char* name, char** ret, int* length) {
   }
   fclose(file);
 
-  printf("read file ok: %s\n", chars);
-
-
   *ret = chars;
   *length = size;
-  printf("%d\n", size);
+  
   return true;
 }
 
