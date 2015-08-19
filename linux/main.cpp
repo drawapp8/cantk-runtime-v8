@@ -39,7 +39,7 @@ typedef struct _AppInfo {
 	int shouldQuit;
 }AppInfo;
 
-static void pollEvents(uv_idle_t* handle, int status) {
+static void pollEvents(uv_idle_t* handle) {
 	AppInfo* info = (AppInfo*)handle->data;
 	double lastEventTime = info->lastEventTime;
 	double lastUptateTime = info->lastUptateTime;

@@ -15,16 +15,26 @@ NAN_METHOD(FileSystemReadAsText) {
 	NanScope();
 	FileSystem* obj = ObjectWrap::Unwrap<FileSystem>(args.This());
 
-	if(args.Length() == 1) {
+	if(args.Length() == 2) {
 		v8::String::Utf8Value src(args[0]);
+		v8::String::Utf8Value mimeType(args[1]);
+				
 		int length = 0;
 		uint8_t* buff = NULL;
 		bool ret = obj->readAsText(*src, (char**)&buff, &length);
 
 		if(ret) {
-			printf("length:%d\n", length);
-			Handle<String> str = String::NewFromOneByte(Isolate::GetCurrent(),buff,String::kNormalString,length);
-			NanReturnValue(str);
+			const char* type = *mimeType;
+			printf("type=%s length:%d\n", type, length);
+
+			if(type && strstr(type, "x-user-defined") != NULL) {
+				Handle<String> str = String::NewFromOneByte(Isolate::GetCurrent(),buff,String::kNormalString,length);
+				NanReturnValue(str);
+			}
+			else {
+				Handle<String> str = NanNew<String>(buff);
+				NanReturnValue(str);
+			}
 			delete buff;
 		}
 		else {

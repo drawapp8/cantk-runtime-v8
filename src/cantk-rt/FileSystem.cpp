@@ -1,5 +1,7 @@
+#include <errno.h>
 #include <unistd.h>
 #include "FileSystem.h"
+
 FileSystem::FileSystem(){
 }
 
@@ -8,13 +10,17 @@ FileSystem::~FileSystem(){
 
 
 bool FileSystem::readAsText(const char* name, char** ret, int* length) {
+  if(strncmp(name, "file://", 7) == 0) {
+  	name += 7;
+  }
+
   FILE* file = fopen(name, "rb");
   if (file == NULL) {
-  	printf("open file failed: %s\n", name);
+  	printf("open file failed: %s %d\n", name, errno);
   	return false;
   }
+  
   printf("open file ok: %s\n", name);
-
   fseek(file, 0, SEEK_END);
   int size = ftell(file);
   rewind(file);
@@ -26,6 +32,9 @@ bool FileSystem::readAsText(const char* name, char** ret, int* length) {
     i += read;
   }
   fclose(file);
+
+  printf("read file ok: %s\n", chars);
+
 
   *ret = chars;
   *length = size;
