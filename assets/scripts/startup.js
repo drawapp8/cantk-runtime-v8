@@ -192,6 +192,10 @@ document.documentElement = {tagName:"HTML", style:{}};
 window.document = document;
 
 window.screen = new Screen();
+window.innerWidth = screen.width;
+window.innerHeight = window.height;
+document.documentElement.clientWidth = screen.width;
+document.documentElement.clientHeight = screen.height;
 
 var ACTION_UP = 0;
 var ACTION_DOWN = 1;
