@@ -402,17 +402,17 @@ XMLHttpRequest.prototype.send = function(body) {
 }
 
 XMLHttpRequest.prototype.sendToLocal = function(body) {
+	var me = this;
 	this.httpClient = {};
-
 	this.setReadyState(XMLHttpRequest.Sent);
-	var text = window.fs.readAsText(this.url, this.mimeType);
-	this.setReadyState(XMLHttpRequest.Receiving);
-	
-	this.httpClient.status = 200;
-	this.httpClient.statusText = "200 OK";
-	this.httpClient.responseText = text;
 
-	this.setReadyState(XMLHttpRequest.Loaded);
+	var text = window.fs.readAsText(this.url, this.mimeType, function(text) {
+		me.setReadyState(XMLHttpRequest.Receiving);
+		me.httpClient.status = 200;
+		me.httpClient.statusText = "200 OK";
+		me.httpClient.responseText = text;
+		me.setReadyState(XMLHttpRequest.Loaded);
+	});
 }
 
 XMLHttpRequest.prototype.sendToRemote = function(body) {
