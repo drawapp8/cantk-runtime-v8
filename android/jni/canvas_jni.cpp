@@ -8,6 +8,7 @@
  *
 **/
 
+#include <uv.h>
 #include <jni.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -30,6 +31,10 @@ static double lastRenderTime = 0.0;
 
 #define JNIAPI extern "C" JNIEXPORT void JNICALL
 #define JNIAPIINT extern "C" JNIEXPORT int JNICALL
+
+extern "C" int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result) {
+	return -1;
+}
 
 static void graphic_context_resize(int w, int h, int dpi) {
 	glClearDepthf(1.0f);
@@ -94,6 +99,7 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_render(JNIEnv * env, jobject obj)
 	double dt = t - lastRenderTime;
 	lastRenderTime = t;
 
+	uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 	HttpClient::pollEvents();
 	V8Wrapper::tick(t, dt);
 
