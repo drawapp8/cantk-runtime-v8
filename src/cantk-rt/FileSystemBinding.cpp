@@ -11,23 +11,64 @@ NAN_METHOD(newFileSystem) {
 	NanReturnValue(args.This());
 }
 
+typedef struct _ReadCtx {
+	string type;
+	NanCallback* onDone;
+}ReadCtx;
+
+static void onReadResult(void* ctx, char* content, int length) {
+	NanScope();
+
+	ReadCtx* readCtx = (ReadCtx*)ctx;
+	uint8_t* buff = (uint8_t*)content;
+	bool userDefinedType = readCtx->type.find("x-user-defined") >= 0;
+
+	Handle<String> str = userDefinedType ? String::NewFromOneByte(Isolate::GetCurrent(),buff,String::kNormalString,length):NanNew<String>(buff);
+
+	if(readCtx->onDone) {
+		Handle<Value> argv[1] = {str};
+		readCtx->onDone->Call(1, argv);
+		delete readCtx->onDone;
+	}
+
+	delete readCtx;
+}
+
 NAN_METHOD(FileSystemReadAsText) {
 	NanScope();
+
+	string name;
+	string type;
+	NanCallback* onDone = NULL;
+	int argsLength = args.Length();
 	FileSystem* obj = ObjectWrap::Unwrap<FileSystem>(args.This());
 
-	if(args.Length() == 2) {
+	if(argsLength > 0) {
 		v8::String::Utf8Value src(args[0]);
+		const char* p = *src;
+		if(strncmp(p, "file://", 7) == 0) {
+			p += 7;
+		}	
+		name = p;
+	}
+	
+	if(argsLength > 1) {
 		v8::String::Utf8Value mimeType(args[1]);
-				
+		type = *mimeType;	
+	}
+	
+	if(argsLength > 2) {
+		onDone = new NanCallback(args[2].As<Function>());
+	}
+
+	if(!onDone) {
+		//sync read
 		int length = 0;
 		uint8_t* buff = NULL;
-		bool ret = obj->readAsText(*src, (char**)&buff, &length);
+		bool ret = FileSystem::readFileSync(name.c_str(), (char**)&buff, &length);
 
 		if(ret) {
-			const char* type = *mimeType;
-			printf("type=%s length:%d\n", type, length);
-
-			if(type && strstr(type, "x-user-defined") != NULL) {
+			if(type.find("x-user-defined") >= 0) {
 				Handle<String> str = String::NewFromOneByte(Isolate::GetCurrent(),buff,String::kNormalString,length);
 				NanReturnValue(str);
 			}
@@ -40,10 +81,17 @@ NAN_METHOD(FileSystemReadAsText) {
 		else {
 			NanReturnNull();
 		}
+	}
+	else {
+		//async read
+		ReadCtx* ctx = new ReadCtx();
 
-		return;
+		ctx->type = type;
+		ctx->onDone = onDone;
+		FileSystem::readFile(name.c_str(), onReadResult, ctx);
 	}
 
+	return;
 }
 
 
