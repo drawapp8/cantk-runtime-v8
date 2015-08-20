@@ -1,3 +1,4 @@
+#include "console.h"
 #include "FileSystem.h"
 
 #include "FileSystemBinding.h"
@@ -58,7 +59,12 @@ NAN_METHOD(FileSystemReadAsText) {
 	}
 	
 	if(argsLength > 2) {
-		onDone = new NanCallback(args[2].As<Function>());
+		if(args[2]->IsFunction()) {
+			onDone = new NanCallback(args[2].As<Function>());
+		}
+		else {
+			LOGI("not a valid function.\n");
+		}
 	}
 
 	if(!onDone) {
