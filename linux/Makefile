@@ -2,12 +2,12 @@ V8_SRC=/home/lixianjing/work/lab/cantk/v8
 V8BINDING_ROOT=/work/lab/cantk/v8-native-binding-generator/
 
 THIRD_ROOT=../src/third
-CFLAGS=-I$(V8_SRC) -I$(V8_SRC)/include -I../src/cantk-rt -I$(THIRD_ROOT) \
+CFLAGS=-I$(V8_SRC) -I$(V8_SRC)/include -I../src/cantk-rt -I../src/cantk-rt/htmlparser -I$(THIRD_ROOT) \
 		-I$(THIRD_ROOT)/nanovg/src -I$(V8BINDING_ROOT) -I$(THIRD_ROOT)/libuv/include\
 		-I$(THIRD_ROOT)/libuv/src \
 		-DNANOVG_GL2 -DNANOVG_GLEW
 
-VPATH=./:../src/cantk-rt/:$(THIRD_ROOT)/fossa/:$(THIRD_ROOT)/nanovg/src/:$(THIRD_ROOT)/libuv/src/unix/:$(THIRD_ROOT)/libuv/src
+VPATH=./:../src/cantk-rt/:../src/cantk-rt/htmlparser:$(THIRD_ROOT)/fossa/:$(THIRD_ROOT)/nanovg/src/:$(THIRD_ROOT)/libuv/src/unix/:$(THIRD_ROOT)/libuv/src
 OBJS=main.o \
 	Config.o \
 	Location.o \
@@ -51,7 +51,9 @@ OBJS=main.o \
 	linux-core.o \
 	linux-inotify.o \
 	linux-syscalls.o \
-	proctitle.o
+	proctitle.o \
+	parse_html.o \
+	xml_parser.o
 
 LIBV8_ROOT=$(V8_SRC)/out/x64.debug/obj.target/tools/gyp
 LIBICU_ROOT=$(V8_SRC)/out/x64.debug/obj.target/third_party/icu

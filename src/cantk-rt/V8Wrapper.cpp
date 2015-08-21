@@ -1,6 +1,7 @@
 #include "Native.h"
 #include "Config.h"
 #include "V8Wrapper.h"
+#include "parse_html.h"
 #include "CanvasRenderingContext2d.h"
 
 class SimpleArrayBufferAllocator : public ArrayBuffer::Allocator {
@@ -178,6 +179,15 @@ void LoadFile(const char* fileName) {
            v8::String::NewFromUtf8(isolate, "Error loading file"));
       return;
     }
+
+	int len = strlen(fileName);
+	if(strcasecmp(fileName+len-5, ".html") == 0 || strcasecmp(fileName+len-4, ".htm") == 0) {
+		v8::String::Utf8Value s(source);
+		string str = extractScriptInHTML(*s);
+		source = NanNew(str.c_str());
+		LOGI("load html file %s:\n%s\n", fileName, str.c_str());
+	}
+
     if (!ExecuteString(isolate,
                        source,
                        v8::String::NewFromUtf8(isolate, fileName),

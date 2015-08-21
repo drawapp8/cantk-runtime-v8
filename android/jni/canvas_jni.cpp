@@ -74,9 +74,9 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_surfaceCreated(JNIEnv * env, jobject ob
 	Config::init(argc, argv);
 	V8Wrapper::init(argc, argv);
 
-	const char* defaultAppIndex = "/mnt/sdcard-ext/cantk-rt-v8/scripts/test/app-test.js";
+	const char* defaultAppIndex = "/mnt/sdcard-ext/cantk-rt-v8/scripts/cantk/index.html";
 	if(!stat(defaultAppIndex, &st) == 0) {
-		defaultAppIndex = "/mnt/sdcard/cantk-rt-v8/scripts/test/app-test.js";
+		defaultAppIndex = "/mnt/sdcard/cantk-rt-v8/scripts/cantk/index.html";
 	}
 
 	V8Wrapper::loadApp(defaultAppIndex);

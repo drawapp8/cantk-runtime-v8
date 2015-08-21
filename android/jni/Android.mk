@@ -68,7 +68,7 @@ CANTK_RT_SRC=../../src/cantk-rt/
 
 LOCAL_CFLAGS    :=  -DNANOVG_GLES2_IMPLEMENTATION -DDEBUG -DANDROID  -Os \
 	-I/work/android/android-4.4/frameworks/native/include -D__linux__ \
-	-I$(THIRD_SRC)/nanovg/src/ -I$(THIRD_SRC) -I$(CANTK_RT_SRC) -I$(THIRD_SRC)/libuv/include -I$(THIRD_SRC)/libuv/src
+	-I$(THIRD_SRC)/nanovg/src/ -I$(THIRD_SRC) -I$(CANTK_RT_SRC) -I$(CANTK_RT_SRC)/htmlparser -I$(THIRD_SRC)/libuv/include -I$(THIRD_SRC)/libuv/src
 
 LOCAL_CPPFLAGS += -std=c++11 -DNANOVG_GLES2 -I./$(THIRD_SRC)/nanovg/src/ -I$(THIRD_SRC) -Wwrite-strings
 
@@ -95,6 +95,8 @@ LOCAL_SRC_FILES := canvas_jni.cpp  \
 	$(CANTK_RT_SRC)/CanvasRenderingContext2dBinding.cpp \
 	$(CANTK_RT_SRC)/color_parser.c \
 	$(CANTK_RT_SRC)/utils.c \
+	$(CANTK_RT_SRC)/htmlparser/parse_html.cpp \
+	$(CANTK_RT_SRC)/htmlparser/xml_parser.c \
 	$(THIRD_SRC)/libuv/src/fs-poll.c \
 	$(THIRD_SRC)/libuv/src/inet.c \
 	$(THIRD_SRC)/libuv/src/threadpool.c \
