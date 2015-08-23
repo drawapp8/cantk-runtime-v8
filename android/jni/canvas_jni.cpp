@@ -24,6 +24,7 @@
 #include "HttpClient.h"
 #include "Config.h"
 #include "V8Wrapper.h"
+#include "queue_event.h"
 
 static int renderTimes = 0;
 static double startupTime = 0.0;
@@ -111,3 +112,41 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_render(JNIEnv * env, jobject obj)
 	LOGI("fps=%d renderTimes=%d dt=%lf t=%lf CLOCKS_PER_SEC=%d\n", fps, renderTimes, dt, t, CLOCKS_PER_SEC);
 }
 
+JNIAPI Java_com_tangide_canvas_CanvasJNI_dispatchKeyDown(JNIEnv * env, jobject obj, jint code) {
+	queueKeyEvent(V8_KEY_DOWN, code);
+}
+
+JNIAPI Java_com_tangide_canvas_CanvasJNI_dispatchKeyUp(JNIEnv * env, jobject obj, jint code) {
+	queueKeyEvent(V8_KEY_UP, code);
+}
+
+JNIAPI Java_com_tangide_canvas_CanvasJNI_dispatchTouchEvent(JNIEnv * env, jobject obj, jint action, jint n, 
+	jintArray _xs, jintArray _ys) 
+{
+	vector<Touch> touchs;	
+	LOGI("action=%d n=%d\n", action, n);
+	jint* xs = env->GetIntArrayElements(_xs,NULL);
+	jint* ys = env->GetIntArrayElements(_ys,NULL);
+
+	if(action == 0) {
+		action = V8_TOUCH_START;
+	}
+	else if(action == 1) {
+		action = V8_TOUCH_END;
+	}
+	else {
+		action = V8_TOUCH_MOVE;
+	}
+
+	for(int i = 0; i < n; i++) {
+		int x = xs[i];
+		int y = ys[i];
+		Touch touch(x, y);
+		touchs.push_back(touch);
+	}
+
+	env->ReleaseIntArrayElements(_xs, xs, 0);
+	env->ReleaseIntArrayElements(_ys, ys, 0);
+
+	queueTouchEvent(action, touchs);
+}

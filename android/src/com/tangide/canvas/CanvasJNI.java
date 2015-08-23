@@ -31,4 +31,7 @@ public class CanvasJNI {
      public static native void surfaceCreated();
      public static native void surfaceChanged(int width, int height);
      public static native void render();
+     public static native void dispatchKeyDown(int code);
+     public static native void dispatchKeyUp(int code);
+     public static native void dispatchTouchEvent(int action, int n, int[] x, int[] y);
 }

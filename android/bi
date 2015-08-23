@@ -1,3 +1,4 @@
+cd jni; . build.sh; cd -
 ant debug
 adb install -r bin/GameRunner-debug.apk
 

@@ -106,6 +106,39 @@ class CanvasView extends GLSurfaceView {
         /* Set the renderer responsible for frame rendering */
         setRenderer(new Renderer());
     }
+	
+	@Override
+	public boolean onKeyDown (int keyCode, KeyEvent event) {
+		CanvasJNI.dispatchKeyDown(keyCode);
+
+		return true;
+	}
+
+	@Override
+	public boolean onKeyUp (int keyCode, KeyEvent event) {
+		CanvasJNI.dispatchKeyUp(keyCode);
+
+		return true;
+	}
+
+	@Override
+	public boolean onTouchEvent (MotionEvent event) {
+		int action = event.getAction();
+		final int n = event.getPointerCount();
+
+		int[] xs = new int[n];
+		int[] ys = new int[n];
+		for (int i = 0; i < n; i++) {
+			float x = event.getX(i);
+			float y = event.getY(i);
+			xs[i] = (int)x;
+			ys[i] = (int)y;
+		}
+
+		CanvasJNI.dispatchTouchEvent(action, n, xs, ys);
+
+		return true;
+	}
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
         private static int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
