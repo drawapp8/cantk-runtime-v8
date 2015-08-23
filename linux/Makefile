@@ -1,5 +1,5 @@
-V8_SRC=/home/lixianjing/work/lab/cantk/v8
-V8BINDING_ROOT=/work/lab/cantk/v8-native-binding-generator/
+V8_SRC ?= /home/lixianjing/work/lab/cantk/v8
+V8BINDING_ROOT ?= /work/lab/cantk/v8-native-binding-generator/
 
 THIRD_ROOT=../src/third
 CFLAGS=-I$(V8_SRC) -I$(V8_SRC)/include -I../src/cantk-rt -I../src/cantk-rt/htmlparser -I$(THIRD_ROOT) \

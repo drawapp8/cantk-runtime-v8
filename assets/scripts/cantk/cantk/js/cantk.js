@@ -1280,43 +1280,43 @@ function TextLayout(canvas) {
 	return this;
 }
 
-var XMLHttpRequest = (function () {
-	if (typeof window === 'undefined') {
-		throw new Error('no window object present');
-	}
-	else if (window.XMLHttpRequest) {
-		return window.XMLHttpRequest;
-	}
-	else if (window.ActiveXObject) {
-		var axs = [
-			'Msxml2.XMLHTTP.6.0',
-			'Msxml2.XMLHTTP.3.0',
-			'Microsoft.XMLHTTP'
-		];
-		for (var i = 0; i < axs.length; i++) {
-			try {
-				var ax = new(window.ActiveXObject)(axs[i]);
-				return function () {
-					if (ax) {
-						var ax_ = ax;
-						ax = null;
-						return ax_;
-					}
-					else {
-						return new(window.ActiveXObject)(axs[i]);
-					}
-				};
-			}
-			catch (e) {}
-		}
-		throw new Error('ajax not supported in this browser')
-	}
-	else {
-		throw new Error('ajax not supported in this browser');
-	}
-})();
-
 function createXMLHttpRequest() {
+	var XMLHttpRequest = (function () {
+		if (typeof window === 'undefined') {
+			throw new Error('no window object present');
+		}
+		else if (window.XMLHttpRequest) {
+			return window.XMLHttpRequest;
+		}
+		else if (window.ActiveXObject) {
+			var axs = [
+				'Msxml2.XMLHTTP.6.0',
+				'Msxml2.XMLHTTP.3.0',
+				'Microsoft.XMLHTTP'
+			];
+			for (var i = 0; i < axs.length; i++) {
+				try {
+					var ax = new(window.ActiveXObject)(axs[i]);
+					return function () {
+						if (ax) {
+							var ax_ = ax;
+							ax = null;
+							return ax_;
+						}
+						else {
+							return new(window.ActiveXObject)(axs[i]);
+						}
+					};
+				}
+				catch (e) {}
+			}
+			throw new Error('ajax not supported in this browser')
+		}
+		else {
+			throw new Error('ajax not supported in this browser');
+		}
+	})();
+
 	return new XMLHttpRequest();
 }
 
@@ -2467,7 +2467,10 @@ var C_EVT_SCALE = 7;
 var gCancelDefaultAction = false;
 
 function canvasAttachManager(canvas, manager, app) {
-	if(!canvas.isNative) {
+	if(window.cantkRTV8) {
+		window.pointer.emitPointers(window);
+	}
+	else if(!canvas.isNative) {
 		window.pointer.emitPointers(canvas);
 	}
 
@@ -2688,9 +2691,16 @@ function canvasAttachManager(canvas, manager, app) {
 		return cancelDefaultAction(e);
 	}
 
-	canvas.addEventListener('pointerdown', onPointerDown, false);
-	canvas.addEventListener('pointermove', onPointerMove, false);
-	canvas.addEventListener('pointerup',   onPointerUp, false);
+	if(window.cantkRTV8) {
+		window.addEventListener('pointerdown', onPointerDown, false);
+		window.addEventListener('pointermove', onPointerMove, false);
+		window.addEventListener('pointerup',   onPointerUp, false);
+	}
+	else {
+		canvas.addEventListener('pointerdown', onPointerDown, false);
+		canvas.addEventListener('pointermove', onPointerMove, false);
+		canvas.addEventListener('pointerup',   onPointerUp, false);
+	}
 ///////////////////////////////////////////////////////////////	
 	function onGestureScale(e) {
 		var scale = e.scale;
@@ -10235,9 +10245,9 @@ WWindowManager.prototype.draw = function() {
 		canvas.restore();
 	}
 
-	if(this.maxFpsMode || canvas.needRedraw > 0) {
+//	if(this.maxFpsMode || canvas.needRedraw > 0) {
 		this.postRedraw();
-	}
+//	}
 
 	this.canvas.flush();
 	this.lastUpdateTime = Date.now();
@@ -12115,7 +12125,7 @@ function CommandHistory() {
 		root.CanTK = {};
 	}
 
-var gCantkBuildDate = "2015年 08月 19日 星期三 16:51:23 CST";console.log("cantk build date: " + gCantkBuildDate);
+var gCantkBuildDate = "2015年 08月 22日 星期六 16:33:22 CST";console.log("cantk build date: " + gCantkBuildDate);
 /*
  * File: webapp.js
  * Author:	Li XianJing <xianjimli@hotmail.com>
@@ -19167,6 +19177,11 @@ UIElement.IMAGE_POINT1         = "point1_img";
 UIElement.IMAGE_POINT2         = "point2_img";
 UIElement.IMAGE_POINT3         = "point3_img";
 UIElement.IMAGE_POINT4         = "point4_img";
+UIElement.IMAGE_TIPS1          = "tips_img_1";
+UIElement.IMAGE_TIPS2          = "tips_img_2";
+UIElement.IMAGE_TIPS3          = "tips_img_3";
+UIElement.IMAGE_TIPS4          = "tips_img_4";
+UIElement.IMAGE_TIPS5          = "tips_img_5";
 
 UIElement.ITEM_BG_NORMAL  = "item_bg_normal";
 UIElement.ITEM_BG_ACTIVE  = "item_bg_active";
@@ -49484,7 +49499,7 @@ UIRevoluteJoint.prototype.initUIRevoluteJoint = function(type) {
 	return this;
 }
 
-UIRevoluteJoint.prototype.setMotorSpeed = function(motorSpeed) {
+UIRevoluteJoint.prototype.setValue = UIRevoluteJoint.prototype.setMotorSpeed = function(motorSpeed) {
 	if(this.joint) {
 		this.joint.SetMotorSpeed(motorSpeed);
 	}
@@ -49492,7 +49507,7 @@ UIRevoluteJoint.prototype.setMotorSpeed = function(motorSpeed) {
 	return this;
 }
 
-UIRevoluteJoint.prototype.getMotorSpeed = function() {
+UIRevoluteJoint.prototype.getValue = UIRevoluteJoint.prototype.getMotorSpeed = function() {
 	if(this.joint) {
 		return this.joint.GetMotorSpeed();
 	}
@@ -51328,6 +51343,11 @@ UIScene.prototype.initUIScene = function(type, w, h, bg) {
 	this.setCanRectSelectable(false, true);
 	this.addEventNames(["onPointerDown", "onPointerMove", "onPointerUp", "onDoubleClick"]);
 	this.addEventNames(["onSwipeLeft", "onSwipeRight", "onSwipeUp", "onSwipeDown"]);
+	this.setImage(UIElement.IMAGE_TIPS1, null);
+	this.setImage(UIElement.IMAGE_TIPS2, null);
+	this.setImage(UIElement.IMAGE_TIPS3, null);
+	this.setImage(UIElement.IMAGE_TIPS4, null);
+	this.setImage(UIElement.IMAGE_TIPS5, null);
 	this.setCameraFollowParams(0.5, 0.5, 0.5, 0.5);
 
 	return this;
@@ -51719,8 +51739,9 @@ UIScene.prototype.drawTrace = function(canvas) {
 UIScene.prototype.afterPaintChildren = function(canvas) {
 	if(this.mode !== Shape.MODE_EDITING) {
 		this.drawTrace(canvas);
+		this.drawTipsImage(canvas);
 	}
-	
+
 	if(!this.selected || this.mode !== Shape.MODE_EDITING) {
 		return;
 	}
@@ -51802,6 +51823,29 @@ UIScene.prototype.paintChildren = function(canvas) {
 		this.popupWindow.paintSelf(canvas);
 	}
 	
+	return;
+}
+
+UIScene.prototype.setTipsImage = function(index) {
+	this.tipsImageIndex = index;
+
+	return this;
+}
+
+UIScene.prototype.drawTipsImage = function(canvas) {
+	if(!this.tipsImageIndex) {
+		return;
+	}
+
+	var name = "tips_img_" + this.tipsImageIndex;
+	var wImage = this.images[name];
+	if(wImage) {
+		var image = wImage.getImage();
+		var srcRect = wImage.getImageRect();
+		
+		this.drawImageAt(canvas, image, UIElement.IMAGE_DISPLAY_DEFAULT, 0, 0, this.w, this.h, srcRect);
+	}
+
 	return;
 }
 

@@ -269,6 +269,12 @@ EventDispatcher.prototype.dispatchEvent = function(event) {
 		return;
 	}
 	
+	if(!event.target) {
+		event.target = window;
+		event.preventDefault = function() {
+		}
+	}
+	
 	var callbacks = this.eventListeners[name];
 	if(callbacks) {
 		var n = callbacks.length;
@@ -299,8 +305,18 @@ EventDispatcher.prototype.dispatchEvent = function(event) {
 EventDispatcher.apply(window);
 EventDispatcher.apply(document);
 
+window.ontouchstart = function() {
+}
+
+window.ontouchend = function() {
+}
+
+window.ontouchmove = function() {
+}
+
 window.dispatchEvent = function(event) {
 	document.dispatchEvent(event);
+	
 	EventDispatcher.prototype.dispatchEvent.call(this, event);
 }
 
@@ -457,7 +473,6 @@ function navigator() {
 }
 
 navigator.language = "zh-CN";
-navigator.pointerEnabled = true;
 navigator.userAgent = "Mozilla/5.0 (Linux; Android 5.0.1; CanRT Runtime) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.93 Mobile Safari/537.36";
 navigator.appVersion = "5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.65 Safari/537.36";
 
