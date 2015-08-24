@@ -73,7 +73,7 @@ LOCAL_CFLAGS    :=  -DNANOVG_GLES2_IMPLEMENTATION -DDEBUG -DANDROID  -Os \
 LOCAL_CPPFLAGS += -std=c++11 -DNANOVG_GLES2 -I./$(THIRD_SRC)/nanovg/src/ -I$(THIRD_SRC) -Wwrite-strings
 
 LOCAL_MODULE    := cantkrt 
-LOCAL_SRC_FILES := canvas_jni.cpp  queue_event.cpp\
+LOCAL_SRC_FILES := canvas_jni.cpp \
 	$(THIRD_SRC)/fossa/fossa.c \
 	$(THIRD_SRC)/nanovg/src/nanovg.c \
 	$(CANTK_RT_SRC)/Config.cpp \

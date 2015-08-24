@@ -1280,43 +1280,43 @@ function TextLayout(canvas) {
 	return this;
 }
 
-function createXMLHttpRequest() {
-	var XMLHttpRequest = (function () {
-		if (typeof window === 'undefined') {
-			throw new Error('no window object present');
-		}
-		else if (window.XMLHttpRequest) {
-			return window.XMLHttpRequest;
-		}
-		else if (window.ActiveXObject) {
-			var axs = [
-				'Msxml2.XMLHTTP.6.0',
-				'Msxml2.XMLHTTP.3.0',
-				'Microsoft.XMLHTTP'
-			];
-			for (var i = 0; i < axs.length; i++) {
-				try {
-					var ax = new(window.ActiveXObject)(axs[i]);
-					return function () {
-						if (ax) {
-							var ax_ = ax;
-							ax = null;
-							return ax_;
-						}
-						else {
-							return new(window.ActiveXObject)(axs[i]);
-						}
-					};
-				}
-				catch (e) {}
+var XMLHttpRequest = (function () {
+	if (typeof window === 'undefined') {
+		throw new Error('no window object present');
+	}
+	else if (window.XMLHttpRequest) {
+		return window.XMLHttpRequest;
+	}
+	else if (window.ActiveXObject) {
+		var axs = [
+			'Msxml2.XMLHTTP.6.0',
+			'Msxml2.XMLHTTP.3.0',
+			'Microsoft.XMLHTTP'
+		];
+		for (var i = 0; i < axs.length; i++) {
+			try {
+				var ax = new(window.ActiveXObject)(axs[i]);
+				return function () {
+					if (ax) {
+						var ax_ = ax;
+						ax = null;
+						return ax_;
+					}
+					else {
+						return new(window.ActiveXObject)(axs[i]);
+					}
+				};
 			}
-			throw new Error('ajax not supported in this browser')
+			catch (e) {}
 		}
-		else {
-			throw new Error('ajax not supported in this browser');
-		}
-	})();
+		throw new Error('ajax not supported in this browser')
+	}
+	else {
+		throw new Error('ajax not supported in this browser');
+	}
+})();
 
+function createXMLHttpRequest() {
 	return new XMLHttpRequest();
 }
 
@@ -7159,6 +7159,8 @@ WImage.DISPLAY_SCALE_KEEP_RATIO  = 6;
 WImage.DISPLAY_TILE_V = 7;
 WImage.DISPLAY_TILE_H = 8;
 WImage.DISPLAY_AUTO_SIZE_DOWN = 9;
+WImage.DISPLAY_FIT_WIDTH = 10;
+WImage.DISPLAY_FIT_HEIGHT = 11;
 
 WImage.prototype.draw = function(canvas, display, x, y, dw, dh) {
 	var image = this.getImage();
@@ -7288,6 +7290,28 @@ WImage.draw = function(canvas, image, display, x, y, dw, dh, srcRect) {
 			dy = y;
 			
 			canvas.drawImage(image, sx, sy, w, h, dx, dy, dw, dh);
+			break;
+		}
+		case WImage.DISPLAY_FIT_WIDTH: {
+			var scale = dw/w;
+			if(h * scale > dh) {
+				h = dh/scale;
+			}
+			dh = h * scale;
+
+			canvas.drawImage(image, sx, sy, w, h, dx, dy, dw, dh);
+
+			break;
+		}
+		case WImage.DISPLAY_FIT_HEIGHT: {
+			var scale = dh/h;
+			if(w * scale > dw) {
+				w = dw/scale;
+			}
+			dw = w * scale;
+
+			canvas.drawImage(image, sx, sy, w, h, dx, dy, dw, dh);
+
 			break;
 		}
 		default: {
@@ -10245,9 +10269,9 @@ WWindowManager.prototype.draw = function() {
 		canvas.restore();
 	}
 
-//	if(this.maxFpsMode || canvas.needRedraw > 0) {
+	if(window.cantkRTV8 || this.maxFpsMode || canvas.needRedraw > 0) {
 		this.postRedraw();
-//	}
+	}
 
 	this.canvas.flush();
 	this.lastUpdateTime = Date.now();
@@ -12125,7 +12149,7 @@ function CommandHistory() {
 		root.CanTK = {};
 	}
 
-var gCantkBuildDate = "2015年 08月 22日 星期六 16:33:22 CST";console.log("cantk build date: " + gCantkBuildDate);
+var gCantkBuildDate = "2015年 08月 24日 星期一 10:44:28 CST";console.log("cantk build date: " + gCantkBuildDate);
 /*
  * File: webapp.js
  * Author:	Li XianJing <xianjimli@hotmail.com>
@@ -19177,11 +19201,6 @@ UIElement.IMAGE_POINT1         = "point1_img";
 UIElement.IMAGE_POINT2         = "point2_img";
 UIElement.IMAGE_POINT3         = "point3_img";
 UIElement.IMAGE_POINT4         = "point4_img";
-UIElement.IMAGE_TIPS1          = "tips_img_1";
-UIElement.IMAGE_TIPS2          = "tips_img_2";
-UIElement.IMAGE_TIPS3          = "tips_img_3";
-UIElement.IMAGE_TIPS4          = "tips_img_4";
-UIElement.IMAGE_TIPS5          = "tips_img_5";
 
 UIElement.ITEM_BG_NORMAL  = "item_bg_normal";
 UIElement.ITEM_BG_ACTIVE  = "item_bg_active";
@@ -51343,11 +51362,6 @@ UIScene.prototype.initUIScene = function(type, w, h, bg) {
 	this.setCanRectSelectable(false, true);
 	this.addEventNames(["onPointerDown", "onPointerMove", "onPointerUp", "onDoubleClick"]);
 	this.addEventNames(["onSwipeLeft", "onSwipeRight", "onSwipeUp", "onSwipeDown"]);
-	this.setImage(UIElement.IMAGE_TIPS1, null);
-	this.setImage(UIElement.IMAGE_TIPS2, null);
-	this.setImage(UIElement.IMAGE_TIPS3, null);
-	this.setImage(UIElement.IMAGE_TIPS4, null);
-	this.setImage(UIElement.IMAGE_TIPS5, null);
 	this.setCameraFollowParams(0.5, 0.5, 0.5, 0.5);
 
 	return this;
@@ -51739,9 +51753,8 @@ UIScene.prototype.drawTrace = function(canvas) {
 UIScene.prototype.afterPaintChildren = function(canvas) {
 	if(this.mode !== Shape.MODE_EDITING) {
 		this.drawTrace(canvas);
-		this.drawTipsImage(canvas);
 	}
-
+	
 	if(!this.selected || this.mode !== Shape.MODE_EDITING) {
 		return;
 	}
@@ -51823,29 +51836,6 @@ UIScene.prototype.paintChildren = function(canvas) {
 		this.popupWindow.paintSelf(canvas);
 	}
 	
-	return;
-}
-
-UIScene.prototype.setTipsImage = function(index) {
-	this.tipsImageIndex = index;
-
-	return this;
-}
-
-UIScene.prototype.drawTipsImage = function(canvas) {
-	if(!this.tipsImageIndex) {
-		return;
-	}
-
-	var name = "tips_img_" + this.tipsImageIndex;
-	var wImage = this.images[name];
-	if(wImage) {
-		var image = wImage.getImage();
-		var srcRect = wImage.getImageRect();
-		
-		this.drawImageAt(canvas, image, UIElement.IMAGE_DISPLAY_DEFAULT, 0, 0, this.w, this.h, srcRect);
-	}
-
 	return;
 }
 

@@ -14,6 +14,7 @@
 #include <GLES2/gl2ext.h>
 #include <android/bitmap.h>
 
+#include <queue>
 #include <time.h>
 #include <math.h>
 #include <stdio.h>
@@ -29,12 +30,46 @@
 static int renderTimes = 0;
 static double startupTime = 0.0;
 static double lastRenderTime = 0.0;
+static queue<QEvent*> gEventQueue;
+static uv_mutex_t gLock;
 
 #define JNIAPI extern "C" JNIEXPORT void JNICALL
 #define JNIAPIINT extern "C" JNIEXPORT int JNICALL
 
 extern "C" int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result) {
 	return -1;
+}
+
+static void handleEventQueue() {
+	if(!gEventQueue.size()) return;
+
+	QEvent* event;
+	uv_mutex_lock(&gLock);
+	while(gEventQueue.size() > 0) {
+		event = gEventQueue.front();
+
+		if(event->type == QEvent::Q_EVENT_TOUCH) {
+			QTouchEvent* touchEvent = (QTouchEvent*)(event->data);
+			int n = touchEvent->touchs.size();
+			V8Wrapper::dispatchTouchEvent(touchEvent->action, 0, touchEvent->touchs);
+			delete touchEvent;
+		}
+		else if(event->type == QEvent::Q_EVENT_KEY) {
+			QKeyEvent* keyEvent = (QKeyEvent*)(event->data);
+			V8Wrapper::dispatchKeyEvent(keyEvent->action, keyEvent->code, 0, 0);				
+			delete keyEvent;
+		}
+
+		delete event;
+		gEventQueue.pop();
+	}
+	uv_mutex_unlock(&gLock);
+}
+
+static void eventQueuePush(QEvent* event) {
+	uv_mutex_lock(&gLock);
+	gEventQueue.push(event);
+	uv_mutex_unlock(&gLock);
 }
 
 static void graphic_context_resize(int w, int h, int dpi) {
@@ -74,6 +109,7 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_surfaceCreated(JNIEnv * env, jobject ob
 
 	Config::init(argc, argv);
 	V8Wrapper::init(argc, argv);
+	uv_mutex_init(&gLock);
 
 	const char* defaultAppIndex = "/mnt/sdcard-ext/cantk-rt-v8/scripts/cantk/index.html";
 	if(!stat(defaultAppIndex, &st) == 0) {
@@ -100,6 +136,7 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_render(JNIEnv * env, jobject obj)
 	double dt = t - lastRenderTime;
 	lastRenderTime = t;
 
+	handleEventQueue();
 	uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 	HttpClient::pollEvents();
 	V8Wrapper::tick(t, dt);
@@ -113,18 +150,15 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_render(JNIEnv * env, jobject obj)
 }
 
 JNIAPI Java_com_tangide_canvas_CanvasJNI_dispatchKeyDown(JNIEnv * env, jobject obj, jint code) {
-	queueKeyEvent(V8_KEY_DOWN, code);
 }
 
 JNIAPI Java_com_tangide_canvas_CanvasJNI_dispatchKeyUp(JNIEnv * env, jobject obj, jint code) {
-	queueKeyEvent(V8_KEY_UP, code);
 }
 
 JNIAPI Java_com_tangide_canvas_CanvasJNI_dispatchTouchEvent(JNIEnv * env, jobject obj, jint action, jint n, 
 	jintArray _xs, jintArray _ys) 
 {
 	vector<Touch> touchs;	
-	LOGI("action=%d n=%d\n", action, n);
 	jint* xs = env->GetIntArrayElements(_xs,NULL);
 	jint* ys = env->GetIntArrayElements(_ys,NULL);
 
@@ -148,5 +182,8 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_dispatchTouchEvent(JNIEnv * env, jobjec
 	env->ReleaseIntArrayElements(_xs, xs, 0);
 	env->ReleaseIntArrayElements(_ys, ys, 0);
 
-	queueTouchEvent(action, touchs);
+	QTouchEvent* event = new QTouchEvent(action, touchs);
+	eventQueuePush(new QEvent(QEvent::Q_EVENT_TOUCH, event));
+
+	LOGI("uv_async_send action=%d n=%d\n", action, n);
 }

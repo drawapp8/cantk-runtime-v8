@@ -368,6 +368,7 @@ void V8Wrapper::dispatchTouchEvent(int action, int button, vector<Touch> touchs)
 		touchObj->Set(NanNew("y"), NanNew<Integer>(touch.y));
 		touchObj->Set(NanNew("pageY"), NanNew<Integer>(touch.y));
 		targetTouches->Set(NanNew<Integer>(i), touchObj);
+	//	LOGI("V8Wrapper::dispatchTouchEvent: action=%d x=%d y=%d\n", action, touch.x, touch.y);
 	}
 
 	obj->Set(NanNew("targetTouches"), targetTouches);
