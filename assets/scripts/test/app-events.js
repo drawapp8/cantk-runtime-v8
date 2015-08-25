@@ -14,15 +14,15 @@ document.addEventListener("keyup", function(event) {
 	console.log("keyup:" + event.code);
 });
 
-document.addEventListener("pointerdown", function(event) {
-	console.log("pointerdown:" + event.x + "," + event.y);
+document.addEventListener("touchstart", function(event) {
+	console.log("touchstart:");
 });
 
-document.addEventListener("pointerup", function(event) {
-	console.log("pointerup:" + event.x + "," + event.y);
+document.addEventListener("touchend", function(event) {
+	console.log("touchend:");
 });
 
-document.addEventListener("pointermove", function(event) {
-	console.log("pointermove:" + event.x + "," + event.y);
+document.addEventListener("touchmove", function(event) {
+	console.log("touchmove:");
 });
 

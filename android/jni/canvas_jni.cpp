@@ -8,11 +8,13 @@
  *
 **/
 
+#include <uv.h>
 #include <jni.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <android/bitmap.h>
 
+#include <queue>
 #include <time.h>
 #include <math.h>
 #include <stdio.h>
@@ -23,13 +25,52 @@
 #include "HttpClient.h"
 #include "Config.h"
 #include "V8Wrapper.h"
+#include "queue_event.h"
 
 static int renderTimes = 0;
 static double startupTime = 0.0;
 static double lastRenderTime = 0.0;
+static queue<QEvent*> gEventQueue;
+static uv_mutex_t gLock;
 
 #define JNIAPI extern "C" JNIEXPORT void JNICALL
 #define JNIAPIINT extern "C" JNIEXPORT int JNICALL
+
+extern "C" int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf, size_t buflen, struct passwd **result) {
+	return -1;
+}
+
+static void handleEventQueue() {
+	if(!gEventQueue.size()) return;
+
+	QEvent* event;
+	uv_mutex_lock(&gLock);
+	while(gEventQueue.size() > 0) {
+		event = gEventQueue.front();
+
+		if(event->type == QEvent::Q_EVENT_TOUCH) {
+			QTouchEvent* touchEvent = (QTouchEvent*)(event->data);
+			int n = touchEvent->touchs.size();
+			V8Wrapper::dispatchTouchEvent(touchEvent->action, 0, touchEvent->touchs);
+			delete touchEvent;
+		}
+		else if(event->type == QEvent::Q_EVENT_KEY) {
+			QKeyEvent* keyEvent = (QKeyEvent*)(event->data);
+			V8Wrapper::dispatchKeyEvent(keyEvent->action, keyEvent->code, 0, 0);				
+			delete keyEvent;
+		}
+
+		delete event;
+		gEventQueue.pop();
+	}
+	uv_mutex_unlock(&gLock);
+}
+
+static void eventQueuePush(QEvent* event) {
+	uv_mutex_lock(&gLock);
+	gEventQueue.push(event);
+	uv_mutex_unlock(&gLock);
+}
 
 static void graphic_context_resize(int w, int h, int dpi) {
 	glClearDepthf(1.0f);
@@ -68,10 +109,11 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_surfaceCreated(JNIEnv * env, jobject ob
 
 	Config::init(argc, argv);
 	V8Wrapper::init(argc, argv);
+	uv_mutex_init(&gLock);
 
-	const char* defaultAppIndex = "/mnt/sdcard-ext/cantk-rt-v8/scripts/test/app-test.js";
+	const char* defaultAppIndex = "/mnt/sdcard-ext/cantk-rt-v8/scripts/cantk/index.html";
 	if(!stat(defaultAppIndex, &st) == 0) {
-		defaultAppIndex = "/mnt/sdcard/cantk-rt-v8/scripts/test/app-test.js";
+		defaultAppIndex = "/mnt/sdcard/cantk-rt-v8/scripts/cantk/index.html";
 	}
 
 	V8Wrapper::loadApp(defaultAppIndex);
@@ -94,6 +136,8 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_render(JNIEnv * env, jobject obj)
 	double dt = t - lastRenderTime;
 	lastRenderTime = t;
 
+	handleEventQueue();
+	uv_run(uv_default_loop(), UV_RUN_NOWAIT);
 	HttpClient::pollEvents();
 	V8Wrapper::tick(t, dt);
 
@@ -105,3 +149,41 @@ JNIAPI Java_com_tangide_canvas_CanvasJNI_render(JNIEnv * env, jobject obj)
 	LOGI("fps=%d renderTimes=%d dt=%lf t=%lf CLOCKS_PER_SEC=%d\n", fps, renderTimes, dt, t, CLOCKS_PER_SEC);
 }
 
+JNIAPI Java_com_tangide_canvas_CanvasJNI_dispatchKeyDown(JNIEnv * env, jobject obj, jint code) {
+}
+
+JNIAPI Java_com_tangide_canvas_CanvasJNI_dispatchKeyUp(JNIEnv * env, jobject obj, jint code) {
+}
+
+JNIAPI Java_com_tangide_canvas_CanvasJNI_dispatchTouchEvent(JNIEnv * env, jobject obj, jint action, jint n, 
+	jintArray _xs, jintArray _ys) 
+{
+	vector<Touch> touchs;	
+	jint* xs = env->GetIntArrayElements(_xs,NULL);
+	jint* ys = env->GetIntArrayElements(_ys,NULL);
+
+	if(action == 0) {
+		action = V8_TOUCH_START;
+	}
+	else if(action == 1) {
+		action = V8_TOUCH_END;
+	}
+	else {
+		action = V8_TOUCH_MOVE;
+	}
+
+	for(int i = 0; i < n; i++) {
+		int x = xs[i];
+		int y = ys[i];
+		Touch touch(x, y);
+		touchs.push_back(touch);
+	}
+
+	env->ReleaseIntArrayElements(_xs, xs, 0);
+	env->ReleaseIntArrayElements(_ys, ys, 0);
+
+	QTouchEvent* event = new QTouchEvent(action, touchs);
+	eventQueuePush(new QEvent(QEvent::Q_EVENT_TOUCH, event));
+
+	LOGI("uv_async_send action=%d n=%d\n", action, n);
+}

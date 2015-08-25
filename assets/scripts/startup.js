@@ -3,6 +3,7 @@ window.tickTime = 0;
 window.timerFuncs = {};
 window.intervalFuncs = {};
 window.requestAnimationFrameFuncs = {};
+window.cantkRTV8 = true;
 
 function setTimeout(callback, duration) {
 	if(!callback) return;
@@ -191,6 +192,10 @@ document.documentElement = {tagName:"HTML", style:{}};
 window.document = document;
 
 window.screen = new Screen();
+window.innerWidth = screen.width;
+window.innerHeight = window.height;
+document.documentElement.clientWidth = screen.width;
+document.documentElement.clientHeight = screen.height;
 
 var ACTION_UP = 0;
 var ACTION_DOWN = 1;
@@ -264,11 +269,17 @@ EventDispatcher.prototype.dispatchEvent = function(event) {
 		return;
 	}
 	
+	if(!event.target) {
+		event.target = window;
+		event.preventDefault = function() {
+		}
+	}
+	
 	var callbacks = this.eventListeners[name];
 	if(callbacks) {
 		var n = callbacks.length;
 
-		//FIXME
+		callbacks = callbacks.slice();
 		for(var i = 0; i < n; i++) {
 			var iter = callbacks[i];
 			var callback = iter.callback;
@@ -294,8 +305,18 @@ EventDispatcher.prototype.dispatchEvent = function(event) {
 EventDispatcher.apply(window);
 EventDispatcher.apply(document);
 
+window.ontouchstart = function() {
+}
+
+window.ontouchend = function() {
+}
+
+window.ontouchmove = function() {
+}
+
 window.dispatchEvent = function(event) {
 	document.dispatchEvent(event);
+	
 	EventDispatcher.prototype.dispatchEvent.call(this, event);
 }
 
@@ -338,7 +359,9 @@ XMLHttpRequest.prototype.setReadyState = function(readyState) {
 		this.responseText = httpClient.responseText;
 
 		try {
-			this.respHeaders = JSON.parse(httpClient.responseHeaders);
+			if(httpClient.responseHeaders) {
+				this.respHeaders = JSON.parse(httpClient.responseHeaders);
+			}
 		}
 		catch(e) {
 			console.log("parse header failed:" + httpClient.responseHeaders);
@@ -380,6 +403,9 @@ XMLHttpRequest.prototype.open = function(method, url, async, username, password)
 }
 
 XMLHttpRequest.prototype.overrideMimeType = function(mimeType) {
+	this.mimeType = mimeType;
+
+	return;
 }
 
 XMLHttpRequest.prototype.send = function(body) {
@@ -392,17 +418,17 @@ XMLHttpRequest.prototype.send = function(body) {
 }
 
 XMLHttpRequest.prototype.sendToLocal = function(body) {
+	var me = this;
 	this.httpClient = {};
-
 	this.setReadyState(XMLHttpRequest.Sent);
-	var text = window.fs.readAsText(this.url);
-	this.setReadyState(XMLHttpRequest.Receiving);
-	
-	this.httpClient.status = 200;
-	this.httpClient.statusText = "200 OK";
-	this.httpClient.responseText = text;
 
-	this.setReadyState(XMLHttpRequest.Loaded);
+	var text = window.fs.readAsText(this.url, this.mimeType, function(text) {
+		me.setReadyState(XMLHttpRequest.Receiving);
+		me.httpClient.status = 200;
+		me.httpClient.statusText = "200 OK";
+		me.httpClient.responseText = text;
+		me.setReadyState(XMLHttpRequest.Loaded);
+	});
 }
 
 XMLHttpRequest.prototype.sendToRemote = function(body) {
@@ -447,7 +473,7 @@ function navigator() {
 }
 
 navigator.language = "zh-CN";
-navigator.userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.65 Safari/537.36";
+navigator.userAgent = "Mozilla/5.0 (Linux; Android 5.0.1; CanRT Runtime) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.93 Mobile Safari/537.36";
 navigator.appVersion = "5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.65 Safari/537.36";
 
 window.location = new Location();
@@ -513,6 +539,31 @@ function loadURL(url) {
 }
 
 EventDispatcher.apply(Image.prototype);
+
+///////////////////////////////////////////////////////
+//TODO: implement Audio
+///////////////////////////////////////////////////////
+
+function Audio() {
+}
+
+Audio.prototype.load = function() {
+
+}
+
+Audio.prototype.play = function() {
+}
+
+Audio.prototype.pause = function() {
+}
+
+Audio.prototype.canPlayType = function(type) {
+	return "yes";
+}
+
+Audio.prototype.addEventListener = function() {
+}
+///////////////////////////////////////////////////////
 
 //loadURL("lwf/app-lwf.js");
 //loadURL("pixi/app-pixi.js");

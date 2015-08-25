@@ -1,6 +1,7 @@
 #include "Native.h"
 #include "Config.h"
 #include "V8Wrapper.h"
+#include "parse_html.h"
 #include "CanvasRenderingContext2d.h"
 
 class SimpleArrayBufferAllocator : public ArrayBuffer::Allocator {
@@ -178,6 +179,15 @@ void LoadFile(const char* fileName) {
            v8::String::NewFromUtf8(isolate, "Error loading file"));
       return;
     }
+
+	int len = strlen(fileName);
+	if(strcasecmp(fileName+len-5, ".html") == 0 || strcasecmp(fileName+len-4, ".htm") == 0) {
+		v8::String::Utf8Value s(source);
+		string str = extractScriptInHTML(*s);
+		source = NanNew(str.c_str());
+		LOGI("load html file %s:\n%s\n", fileName, str.c_str());
+	}
+
     if (!ExecuteString(isolate,
                        source,
                        v8::String::NewFromUtf8(isolate, fileName),
@@ -279,16 +289,14 @@ void V8Wrapper::init(int argc, char* argv[]) {
 		LOGI("Error: Script does not declare 'tick' global function.\n");
 		return;
 	}
-	Handle<Function> tickFunc = Handle<Function>::Cast(tickVal);
-	NanAssignPersistent(V8Wrapper::sTickFunc, tickFunc);
-    
+	V8Wrapper::sTickFunc = new NanCallback(tickVal.As<Function>());
+
 	Handle<Value> dispatchEventVal = V8Wrapper::sContext->Global()->Get(NanNew("dispatchEvent"));
 	if (!dispatchEventVal->IsFunction()) {
 		LOGI("Error: Script does not declare 'dispatchEvent' global function.\n");
 		return;
 	}
-	Handle<Function> dispatchEventFunc = Handle<Function>::Cast(dispatchEventVal);
-	NanAssignPersistent(V8Wrapper::sDispatchEventFunc, dispatchEventFunc);
+	V8Wrapper::sDispatchEventFunc = new NanCallback(dispatchEventVal.As<Function>());
 
 	LOGI("V8Wrapper::init done\n");
 }
@@ -306,10 +314,10 @@ void V8Wrapper::resize(int w, int h) {
 }
 
 void V8Wrapper::tick(double t, double dt) {
-	NanScope();
 	Isolate* isolate = V8Wrapper::sIsolate;
     Isolate::Scope isolate_scope(isolate);
-	Handle<Function> tickFunc = NanNew(V8Wrapper::sTickFunc);
+	
+	NanScope();
 
 	TryCatch try_catch;
 	Handle<Value> _argv[2];
@@ -317,7 +325,7 @@ void V8Wrapper::tick(double t, double dt) {
 	_argv[1] = Number::New(isolate, dt);
 
 	CanvasRenderingContext2d::beginPaint();
-	Handle<Value> result = tickFunc->Call(isolate->GetCurrentContext()->Global(), 2, _argv);
+	Handle<Value> result = V8Wrapper::sTickFunc->Call(2, _argv);
 	CanvasRenderingContext2d::endPaint();
 	
 	if (try_catch.HasCaught()) {
@@ -327,35 +335,63 @@ void V8Wrapper::tick(double t, double dt) {
 }
 	
 void V8Wrapper::dispatchEvent(Handle<Object> event) {
+	NanScope();
 	Handle<Value> _argv[1] = {event};
-	Handle<Function> func = NanNew(V8Wrapper::sDispatchEventFunc);
 
-	func->Call(Isolate::GetCurrent()->GetCurrentContext()->Global(), 1, _argv);
+	V8Wrapper::sDispatchEventFunc->Call(1, _argv);
 }
 
 void V8Wrapper::dispatchPointerEvent(int action, int button, int x, int y) {
 	NanScope();
+	vector<Touch> touchs;
+	touchs.push_back(Touch(x, y));
+
+	V8Wrapper::dispatchTouchEvent(action, button, touchs);
+}
+
+void V8Wrapper::dispatchTouchEvent(int action, int button, vector<Touch> touchs) {
+	Isolate* isolate = V8Wrapper::sIsolate;
+    Isolate::Scope isolate_scope(isolate);
+
+	NanScope();
+	int n = touchs.size();
 	Handle<Object> obj = NanNew<Object>();
-	
+	Handle<Array> targetTouches = NanNew<Array>(n);
+
+	Handle<Object> touchObj;
+	for(int i = 0; i < n; i++) {
+		Touch touch = touchs[i];
+		touchObj = NanNew<Object>();
+		touchObj->Set(NanNew("identifier"), NanNew<Integer>(0));
+		touchObj->Set(NanNew("x"), NanNew<Integer>(touch.x));
+		touchObj->Set(NanNew("pageX"), NanNew<Integer>(touch.x));
+		touchObj->Set(NanNew("y"), NanNew<Integer>(touch.y));
+		touchObj->Set(NanNew("pageY"), NanNew<Integer>(touch.y));
+		targetTouches->Set(NanNew<Integer>(i), touchObj);
+	//	LOGI("V8Wrapper::dispatchTouchEvent: action=%d x=%d y=%d\n", action, touch.x, touch.y);
+	}
+
+	obj->Set(NanNew("targetTouches"), targetTouches);
 	if(action == 1) {
-		obj->Set(NanNew("name"), NanNew("pointerdown"));
+		obj->Set(NanNew("name"), NanNew("touchstart"));
 	}
 	else if(action == 0) {
-		obj->Set(NanNew("name"), NanNew("pointerup"));
+		obj->Set(NanNew("name"), NanNew("touchend"));
 	}
 	else if(action == 3) {
-		obj->Set(NanNew("name"), NanNew("pointermove"));
+		obj->Set(NanNew("name"), NanNew("touchmove"));
 	}
 
 	obj->Set(NanNew("action"), NanNew<Number>(action));
 	obj->Set(NanNew("button"), NanNew<Number>(button));
-	obj->Set(NanNew("x"), NanNew<Number>(x));
-	obj->Set(NanNew("y"), NanNew<Number>(y));
 
 	V8Wrapper::dispatchEvent(obj);
 }
 
 void V8Wrapper::dispatchKeyEvent(int action, int code, int mods, int scancode) {
+	Isolate* isolate = V8Wrapper::sIsolate;
+    Isolate::Scope isolate_scope(isolate);
+	
 	NanScope();
 	Handle<Object> obj = NanNew<Object>();
 
@@ -382,8 +418,8 @@ void V8Wrapper::dispatchKeyEvent(int action, int code, int mods, int scancode) {
 
 Isolate* V8Wrapper::sIsolate = NULL;
 Platform* V8Wrapper::sPlatform = NULL;
-Persistent<Function> V8Wrapper::sTickFunc;
+NanCallback* V8Wrapper::sTickFunc;
 Handle<Context> V8Wrapper::sContext;
-Persistent<Function> V8Wrapper::sDispatchEventFunc;
+NanCallback* V8Wrapper::sDispatchEventFunc;
 
 

@@ -14,6 +14,8 @@ using namespace std;
 using namespace v8;
 
 
+typedef void (*onContentFunc)(void* ctx, char* buffer, int length);
+
 class FileSystem: public ObjectWrap {
 public:
 	FileSystem();
@@ -23,6 +25,10 @@ public:
 
 	string getCwd() const;
 	void setCwd(string cwd);
+	
+	static bool readFile(const char* name, onContentFunc onContent, void* ctx);
+	static bool readFileSync(const char* name, char** ret, int* length);
+
 private:
 };
 
