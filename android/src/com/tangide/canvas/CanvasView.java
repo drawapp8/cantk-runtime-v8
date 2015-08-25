@@ -70,7 +70,7 @@ class CanvasView extends GLSurfaceView {
 
     public CanvasView(Context context) {
         super(context);
-        init(false, 0, 0);
+        init(false, 0, 8);
     }
 
     public CanvasView(Context context, boolean translucent, int depth, int stencil) {
@@ -88,6 +88,7 @@ class CanvasView extends GLSurfaceView {
         if (translucent) {
             this.getHolder().setFormat(PixelFormat.TRANSLUCENT);
         }
+		setEGLContextClientVersion(2);
 
         /* Setup the context factory for 2.0 rendering.
          * See ContextFactory class definition below
@@ -102,9 +103,15 @@ class CanvasView extends GLSurfaceView {
         setEGLConfigChooser( translucent ?
                              new ConfigChooser(8, 8, 8, 8, depth, stencil) :
                              new ConfigChooser(5, 6, 5, 0, depth, stencil) );
-
+        
+		//	if (translucent) {
+		//		setEGLConfigChooser(8,8,8,8,16,8);
+		//	} else{
+		//		setEGLConfigChooser(8,8,8,8,depth,stencil);
+		//	}
         /* Set the renderer responsible for frame rendering */
         setRenderer(new Renderer());
+		Log.i("GLSurfaceView.ini","**********************************setEglConfigChooser 8888,16,8");
     }
 
     private static class ContextFactory implements GLSurfaceView.EGLContextFactory {

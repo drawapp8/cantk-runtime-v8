@@ -1,4 +1,4 @@
-V8_SRC=/work/jsengine/v8/v8
+V8_SRC=/home/samliu/TOOL/v8
 V8BINDING_ROOT=/work/lab/cantk/v8-native-binding-generator/
 
 THIRD_ROOT=../src/third

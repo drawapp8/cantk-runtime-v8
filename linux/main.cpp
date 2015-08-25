@@ -39,7 +39,7 @@ typedef struct _AppInfo {
 	int shouldQuit;
 }AppInfo;
 
-static void pollEvents(uv_idle_t* handle, int status) {
+static void pollEvents(uv_idle_t* handle) {
 	AppInfo* info = (AppInfo*)handle->data;
 	double lastEventTime = info->lastEventTime;
 	double lastUptateTime = info->lastUptateTime;
@@ -79,8 +79,8 @@ static void pollEvents(uv_idle_t* handle, int status) {
 	}
 
 	// Update and render
-	glViewport(0, 0, fbWidth, fbHeight);glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
-	glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
+	glViewport(0, 0, fbWidth, fbHeight);
+	glClearColor(0.03f, 0.03f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 ////////////////////////////////////////////////////////////////////////////////////
 	V8Wrapper::tick(t, dt);

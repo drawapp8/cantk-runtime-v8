@@ -83,11 +83,16 @@ void CanvasRenderingContext2d::resetTransform() {
 }
 
 void CanvasRenderingContext2d::clip() {
-	//TODO
+	//TOD
+	nvgStencil(ctx);
 }
 
 void CanvasRenderingContext2d::clipRect(double x, double y, double w, double h) {
-	//TODO
+	//TOD
+	nvgBeginPath(ctx);
+	nvgRect(ctx, x, y, w, h);
+	nvgClosePath(ctx);
+	nvgStencil(ctx);
 }
 
 void CanvasRenderingContext2d::fillText(const char* text, double x, double y) {
@@ -160,6 +165,7 @@ void CanvasRenderingContext2d::drawImage(Image* image, double sx, double sy, dou
 	NVGpaint imgPaint = nvgImagePattern(ctx, 0, 0, iw, ih, 0, img, 1);
 
 	nvgSave(ctx);
+	/*
 	nvgBeginPath(ctx);
 	nvgTranslate(ctx, dx-(sx*scaleX), dy-(sy*scaleY));
 	nvgScale(ctx, scaleX, scaleY);
@@ -167,6 +173,11 @@ void CanvasRenderingContext2d::drawImage(Image* image, double sx, double sy, dou
 	nvgFillPaint(ctx, imgPaint);
 	nvgClosePath(ctx);
 	nvgFill(ctx);
+ 	
+	*/
+
+	nvgFillPaint(ctx, imgPaint);
+	nvgImage(ctx, sx, sy, sw, sh, dx, dy, dw, dh, iw, ih);
 	nvgRestore(ctx);
 }
 

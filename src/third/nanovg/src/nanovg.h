@@ -449,7 +449,9 @@ void nvgFill(NVGcontext* ctx);
 // Fills the current path with current stroke style.
 void nvgStroke(NVGcontext* ctx);
 
+void nvgImage(NVGcontext* ctx, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh, float iw, float ih);
 
+void nvgStencil(NVGcontext* ctx);
 //
 // Text
 //
@@ -592,7 +594,11 @@ struct NVGparams {
 	void (*renderCancel)(void* uptr);
 	void (*renderFlush)(void* uptr);
 	void (*renderFill)(void* uptr, NVGpaint* paint, NVGscissor* scissor, float fringe, const float* bounds, const NVGpath* paths, int npaths);
+	void (*renderStencil)(void* uptr, NVGpaint* paint, NVGscissor* scissor, float fringe, const float* bounds, const NVGpath* paths, int npaths, int * pathoffset,int * uniformoffset);
+	void (*restoreStencil)(void* uptr, int npaths, int pathoffset, int uniformoffset);
+	void (*disableStencil)(void* uptr);
 	void (*renderStroke)(void* uptr, NVGpaint* paint, NVGscissor* scissor, float fringe, float strokeWidth, const NVGpath* paths, int npaths);
+	void (*renderImage)(void* uptr, NVGpaint* paint, NVGscissor* scissor, const NVGvertex* verts, int nverts);
 	void (*renderTriangles)(void* uptr, NVGpaint* paint, NVGscissor* scissor, const NVGvertex* verts, int nverts);
 	void (*renderDelete)(void* uptr);
 };

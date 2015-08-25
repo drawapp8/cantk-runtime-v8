@@ -78,6 +78,11 @@ struct NVGstate {
 	float fontBlur;
 	int textAlign;
 	int fontId;
+	//for stencil
+	int pathOffset;
+	int uniformOffset;
+	int pathCount;
+	int pathFlag;
 };
 typedef struct NVGstate NVGstate;
 
@@ -120,7 +125,6 @@ struct NVGcontext {
 	struct FONScontext* fs;
 	int fontImages[NVG_MAX_FONTIMAGES];
 	int fontImageIdx;
-	int drawCallCount;
 	int fillTriCount;
 	int strokeTriCount;
 	int textTriCount;
@@ -294,7 +298,6 @@ void nvgBeginFrame(NVGcontext* ctx, int windowWidth, int windowHeight, float dev
 	
 	ctx->params.renderViewport(ctx->params.userPtr, windowWidth, windowHeight);
 
-	ctx->drawCallCount = 0;
 	ctx->fillTriCount = 0;
 	ctx->strokeTriCount = 0;
 	ctx->textTriCount = 0;
@@ -431,6 +434,11 @@ NVGcolor nvgHSLA(float h, float s, float l, unsigned char a)
 }
 
 
+static NVGstate* nvg__getStateAt(NVGcontext* ctx, int i)
+{
+	return &ctx->states[i];
+}
+
 static NVGstate* nvg__getState(NVGcontext* ctx)
 {
 	return &ctx->states[ctx->nstates-1];
@@ -559,6 +567,25 @@ void nvgRestore(NVGcontext* ctx)
 	if (ctx->nstates <= 1)
 		return;
 	ctx->nstates--;
+
+	
+	NVGstate* state = nvg__getState(ctx);
+	if (state->pathCount > 0 )
+	{
+		if ( state->pathFlag == 2)
+		{
+			state->pathFlag--;
+			ctx->params.restoreStencil(ctx->params.userPtr, state->pathCount, state->pathOffset, state->uniformOffset);
+			//printf("restoreSave, restore stencil %d, flag %d ,nstate %d\n", state->pathCount, state->pathFlag, ctx->nstates);
+		}
+	}
+    else if (state->pathCount == 0 && state->pathFlag > 0) 
+	{
+		state->pathFlag = 0;
+		ctx->params.disableStencil(ctx->params.userPtr);
+		//printf("restoreSave, disable stencil ------------\n");
+	}
+	
 }
 
 void nvgReset(NVGcontext* ctx)
@@ -2084,6 +2111,62 @@ void nvgDebugDumpPathCache(NVGcontext* ctx)
 	}
 }
 
+void nvgStencil(NVGcontext* ctx)
+{
+
+	printf("nvgStencil:ncommands :%d \n",ctx->ncommands);
+	if(ctx->ncommands == 0) 
+	{
+		return;	
+	}
+	int flag = ((int)ctx->commands[ctx->ncommands - 1]);
+	printf("nvgStencil:flag :%d \n",flag);
+	if (flag != NVG_CLOSE)
+	{
+		nvgClosePath(ctx);		
+	}
+	
+	NVGstate* state = nvg__getState(ctx);
+	const NVGpath* path;
+	NVGpaint fillPaint = state->fill;
+	int i;
+	
+
+	nvg__flattenPaths(ctx);
+	//if (ctx->params.edgeAntiAlias)
+	//	nvg__expandFill(ctx, ctx->fringeWidth, NVG_MITER, 2.4f);
+	//else
+		nvg__expandFill(ctx, 0.0f, NVG_MITER, 2.4f);
+
+	// Apply global alpha
+	//fillPaint.innerColor.a *= state->alpha;
+	//fillPaint.outerColor.a *= state->alpha;
+	int pathoffset = 0;	
+	int npaths = ctx->cache->npaths;
+	int uniformoffset = 0;
+	ctx->params.renderStencil(ctx->params.userPtr, &fillPaint, &state->scissor, ctx->fringeWidth,
+						   ctx->cache->bounds, ctx->cache->paths, npaths,&pathoffset, &uniformoffset);
+	state->pathOffset = pathoffset;
+	state->pathCount = npaths;
+	state->uniformOffset = uniformoffset;
+	state->pathFlag = 2;
+	int n = ctx->nstates - 2;
+    //printf("nvgStencil:renderStencil npaths:%d,pathoffset %d,uniformoffset,staten %d \n",npaths,pathoffset,uniformoffset,n);
+	if (n >= 0) {
+		NVGstate * st = nvg__getStateAt(ctx, n);
+		if (st->pathCount == 0)
+		{
+			st->pathFlag = 1;
+		}		
+	}
+	// Count triangles
+	for (i = 0; i < npaths; i++) {
+		path = &ctx->cache->paths[i];
+		ctx->fillTriCount += path->nfill-2;
+		ctx->fillTriCount += path->nstroke-2;
+	}
+}
+
 void nvgFill(NVGcontext* ctx)
 {
 	NVGstate* state = nvg__getState(ctx);
@@ -2109,7 +2192,6 @@ void nvgFill(NVGcontext* ctx)
 		path = &ctx->cache->paths[i];
 		ctx->fillTriCount += path->nfill-2;
 		ctx->fillTriCount += path->nstroke-2;
-		ctx->drawCallCount += 2;
 	}
 }
 
@@ -2149,9 +2231,43 @@ void nvgStroke(NVGcontext* ctx)
 	for (i = 0; i < ctx->cache->npaths; i++) {
 		path = &ctx->cache->paths[i];
 		ctx->strokeTriCount += path->nstroke-2;
-		ctx->drawCallCount++;
 	}
 }
+
+static void nvg_renderImage(NVGcontext* ctx, NVGvertex* verts, int nverts)
+
+{
+	NVGstate* state = nvg__getState(ctx);
+	NVGpaint paint = state->fill;
+	paint.innerColor.a *= state->alpha;
+    paint.outerColor.a *= state->alpha;
+	
+	ctx->params.renderImage(ctx->params.userPtr, &paint, &state->scissor, verts, nverts);
+	ctx->textTriCount += nverts/3;	
+
+}
+
+void nvgImage(NVGcontext* ctx, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh, float iw, float ih)
+{
+	int nverts = 6;
+	NVGvertex verts[6];// (NVGvertex*)malloc(sizeof(NVGvertex)*nverts);
+    NVGvertex* dst = verts;
+	float tx = sx / iw;
+	float ty = sy / ih;
+	nvg__vset(dst, dx, dy, tx, ty);dst++;
+	nvg__vset(dst, dx, dy+dh, tx, ty+sh/ih);dst++;
+	nvg__vset(dst, dx+dw, dy, tx+sw/iw, ty);dst++;
+	
+	nvg__vset(dst, dx+dw, dy, tx+sw/iw, ty);dst++;
+	nvg__vset(dst, dx, dy+dh, tx, ty+sh/ih);dst++;
+	nvg__vset(dst, dx+dw, dy+dh, tx+sw/iw, ty+sh/ih);
+
+	//printf("nvgImage: dst xy:%f,%f  uv:%f,%f  \n",dx, dy, tx,ty);
+	//printf("nvgImage: dst xy:  uv: \n");
+	
+    nvg_renderImage(ctx, verts, nverts);
+}
+
 
 // Add fonts
 int nvgCreateFont(NVGcontext* ctx, const char* name, const char* path)
@@ -2280,7 +2396,6 @@ static void nvg__renderText(NVGcontext* ctx, NVGvertex* verts, int nverts)
 
 	ctx->params.renderTriangles(ctx->params.userPtr, &paint, &state->scissor, verts, nverts);
 
-	ctx->drawCallCount++;
 	ctx->textTriCount += nverts/3;
 }
 
